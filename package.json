@@ -1,0 +1,9 @@
+{
+  "name": "suraksha-grid",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Suraksha Grid — Digital Public Safety Intelligence prototype (hackathon submission)",
+  "engines": {
+    "node": ">=18"
+  }
+}

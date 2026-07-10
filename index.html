@@ -1,0 +1,1694 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Suraksha Grid — Digital Public Safety Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Noto+Sans+Tamil:wght@400;500;600;700&family=Noto+Sans+Telugu:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700&family=Noto+Sans+Kannada:wght@400;500;600;700&family=Noto+Sans+Gujarati:wght@400;500;600;700&family=Noto+Sans+Malayalam:wght@400;500;600;700&family=Noto+Sans+Gurmukhi:wght@400;500;600;700&family=Noto+Sans+Oriya:wght@400;500;600;700&family=Noto+Nastaliq+Urdu:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0B1220;
+    --panel:#131B2E;
+    --panel-2:#182238;
+    --line:#243049;
+    --text:#E8ECF3;
+    --text-dim:#8C97B2;
+    --danger:#E23D28;
+    --danger-bg:rgba(226,61,40,0.12);
+    --caution:#F0A93B;
+    --caution-bg:rgba(240,169,59,0.12);
+    --safe:#2BB673;
+    --safe-bg:rgba(43,182,115,0.12);
+    --brand:#3B82F6;
+    --brand-bg:rgba(59,130,246,0.12);
+    --font-display:'Zilla Slab', Georgia, serif;
+    --font-body:'Inter', system-ui, sans-serif;
+    --font-mono:'JetBrains Mono', 'Courier New', monospace;
+    --font-script: 'Noto Sans', 'Inter', system-ui, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--ink);
+    color:var(--text);
+    font-family:var(--font-body);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* When a non-Latin script is active, route body text through the script font stack
+     so headings/labels/paragraphs render correctly, while mono/data stays mono. */
+  body.script-active, body.script-active input, body.script-active textarea, body.script-active select{
+    font-family:var(--font-script);
+  }
+  body.script-active h1, body.script-active h2, body.script-active .card h2{
+    font-family:var(--font-script);
+  }
+  a{color:inherit;}
+
+  /* ---------- shell ---------- */
+  .shell{max-width:1180px;margin:0 auto;padding:0 20px 60px;}
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:22px 0 18px;border-bottom:1px solid var(--line);
+    flex-wrap:wrap;gap:14px;
+  }
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand-mark{
+    width:38px;height:38px;border-radius:8px;
+    background:linear-gradient(135deg, var(--brand), #1e40af);
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--font-mono);font-weight:600;font-size:15px;color:white;
+    flex-shrink:0;
+  }
+  .brand-text .eyebrow{
+    font-family:var(--font-mono);font-size:10.5px;letter-spacing:0.14em;
+    color:var(--text-dim);text-transform:uppercase;margin-bottom:2px;
+  }
+  .brand-text h1{
+    font-family:var(--font-display);font-size:20px;margin:0;font-weight:600;
+    letter-spacing:0.01em;
+  }
+  .topbar-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .lang-select-wrap{display:flex;align-items:center;gap:8px;}
+  .lang-select-wrap label{margin:0;font-size:11px;color:var(--text-dim);text-transform:none;font-weight:600;}
+  #global-lang{
+    background:var(--panel);border:1px solid var(--line);color:var(--text);
+    border-radius:8px;padding:8px 10px;font-family:var(--font-body);font-size:13px;
+  }
+  .tabs{display:flex;gap:4px;background:var(--panel);padding:4px;border-radius:10px;border:1px solid var(--line);}
+  .tab-btn{
+    font-family:var(--font-body);font-weight:600;font-size:13.5px;
+    padding:9px 16px;border-radius:7px;border:none;background:transparent;
+    color:var(--text-dim);cursor:pointer;transition:all .15s ease;
+  }
+  body.script-active .tab-btn{font-family:var(--font-script);}
+  .tab-btn.active{background:var(--brand);color:white;}
+  .tab-btn:not(.active):hover{color:var(--text);}
+
+  .view{display:none;padding-top:28px;}
+  .view.active{display:block;}
+
+  /* ---------- report view ---------- */
+  .report-layout{display:grid;grid-template-columns:1fr;gap:22px;max-width:640px;margin:0 auto;}
+  .card{
+    background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:24px;
+  }
+  .card h2{font-family:var(--font-display);font-size:19px;margin:0 0 4px;font-weight:600;}
+  .card .sub{color:var(--text-dim);font-size:13.5px;margin:0 0 20px;line-height:1.5;}
+  label{display:block;font-size:12.5px;font-weight:600;color:var(--text-dim);margin-bottom:6px;letter-spacing:0.02em;text-transform:uppercase;}
+  body.script-active label{text-transform:none;}
+  .field{margin-bottom:16px;}
+  input[type=text], textarea, select{
+    width:100%;background:var(--panel-2);border:1px solid var(--line);
+    color:var(--text);border-radius:8px;padding:11px 12px;font-family:var(--font-body);
+    font-size:14.5px;resize:vertical;
+  }
+  input[type=text]:focus, textarea:focus, select:focus{outline:2px solid var(--brand);outline-offset:1px;border-color:var(--brand);}
+  textarea{min-height:90px;line-height:1.5;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .chip-group{display:flex;flex-wrap:wrap;gap:8px;}
+  .chip{
+    font-size:13px;padding:8px 13px;border-radius:20px;border:1px solid var(--line);
+    background:var(--panel-2);color:var(--text-dim);cursor:pointer;transition:.15s;
+  }
+  .chip.selected{background:var(--brand-bg);border-color:var(--brand);color:#9CC1FB;}
+  .submit-btn{
+    width:100%;padding:13px;border-radius:9px;border:none;
+    background:var(--brand);color:white;font-family:var(--font-body);
+    font-weight:700;font-size:14.5px;cursor:pointer;margin-top:6px;
+    transition:.15s;
+  }
+  body.script-active .submit-btn{font-family:var(--font-script);}
+  .submit-btn:hover{background:#2e6fdb;}
+  .submit-btn:disabled{background:var(--panel-2);color:var(--text-dim);cursor:not-allowed;}
+
+  .result-card{border-width:2px;}
+  .result-head{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
+  .verdict-badge{
+    font-family:var(--font-mono);font-weight:700;font-size:13px;
+    padding:6px 12px;border-radius:7px;letter-spacing:0.03em;
+  }
+  body.script-active .verdict-badge{font-family:var(--font-script);}
+  .verdict-badge.high{background:var(--danger-bg);color:var(--danger);}
+  .verdict-badge.medium{background:var(--caution-bg);color:var(--caution);}
+  .verdict-badge.low{background:var(--safe-bg);color:var(--safe);}
+  .confidence{font-family:var(--font-mono);font-size:12px;color:var(--text-dim);}
+  .advisory-text{font-size:15px;line-height:1.6;margin:0 0 16px;}
+  .flags-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-dim);margin:0 0 8px;}
+  body.script-active .flags-title{text-transform:none;}
+  .flags-list{margin:0 0 18px;padding-left:20px;font-size:14px;line-height:1.7;color:var(--text);}
+  .action-row{display:flex;gap:10px;flex-wrap:wrap;}
+  .action-link{
+    font-size:13px;font-weight:600;padding:9px 14px;border-radius:8px;
+    border:1px solid var(--line);background:var(--panel-2);text-decoration:none;
+    display:inline-flex;align-items:center;gap:6px;
+  }
+  .action-link.primary{background:var(--brand);border-color:var(--brand);}
+  .note{font-size:12px;color:var(--text-dim);margin-top:16px;padding-top:14px;border-top:1px solid var(--line);line-height:1.6;}
+  .loading{display:flex;align-items:center;gap:10px;color:var(--text-dim);font-size:14px;padding:8px 0;}
+  .spinner{width:16px;height:16px;border:2px solid var(--line);border-top-color:var(--brand);border-radius:50%;animation:spin .7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* ---------- command center ---------- */
+  .ticker-wrap{
+    background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    overflow:hidden;margin-bottom:24px;position:relative;height:38px;
+  }
+  .ticker-label{
+    position:absolute;left:0;top:0;bottom:0;z-index:2;
+    background:var(--danger);color:white;font-family:var(--font-mono);
+    font-size:11px;font-weight:700;letter-spacing:0.06em;
+    display:flex;align-items:center;padding:0 14px;white-space:nowrap;
+  }
+  .ticker-track{
+    display:flex;align-items:center;height:100%;white-space:nowrap;
+    padding-left:150px;animation:scroll-ticker 28s linear infinite;
+  }
+  @keyframes scroll-ticker{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+  .ticker-item{
+    font-family:var(--font-mono);font-size:12.5px;color:var(--text-dim);
+    margin-right:36px;
+  }
+  body.script-active .ticker-item{font-family:var(--font-script);}
+  .ticker-item .id{color:var(--caution);font-weight:600;font-family:var(--font-mono);}
+
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:26px;}
+  .stat-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;}
+  .stat-num{font-family:var(--font-display);font-size:30px;font-weight:700;margin:0;line-height:1;}
+  .stat-label{font-size:11.5px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.05em;margin-top:6px;}
+  body.script-active .stat-label{text-transform:none;}
+
+  .section-title{font-family:var(--font-display);font-size:18px;font-weight:600;margin:0 0 14px;display:flex;align-items:center;justify-content:space-between;}
+  body.script-active .section-title{font-family:var(--font-script);}
+  .export-btn{
+    font-family:var(--font-mono);font-size:11.5px;font-weight:600;
+    background:var(--panel-2);border:1px solid var(--line);color:var(--text-dim);
+    padding:7px 12px;border-radius:6px;cursor:pointer;
+  }
+  body.script-active .export-btn{font-family:var(--font-script);}
+  .export-btn:hover{color:var(--text);border-color:var(--brand);}
+
+  .cluster-table{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:28px;}
+  .cluster-row{
+    display:grid;grid-template-columns:100px 1fr 90px 140px 90px;
+    gap:12px;padding:14px 18px;border-bottom:1px solid var(--line);align-items:center;
+  }
+  .cluster-row.header{
+    background:var(--panel-2);font-size:10.5px;text-transform:uppercase;
+    letter-spacing:0.05em;color:var(--text-dim);font-weight:700;
+  }
+  body.script-active .cluster-row.header{text-transform:none;}
+  .cluster-row:last-child{border-bottom:none;}
+  .cluster-id{font-family:var(--font-mono);font-size:12.5px;color:var(--caution);}
+  .cluster-type{font-weight:600;font-size:14px;}
+  .cluster-type .sample-num{display:block;font-family:var(--font-mono);font-size:11.5px;color:var(--text-dim);margin-top:3px;font-weight:400;}
+  .severity-pill{
+    font-size:11px;font-weight:700;padding:4px 9px;border-radius:12px;text-align:center;
+    width:fit-content;
+  }
+  .cluster-count{font-family:var(--font-mono);font-weight:700;font-size:15px;}
+  .empty-state{padding:40px 20px;text-align:center;color:var(--text-dim);font-size:13.5px;}
+
+  .reports-feed{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:6px;}
+  .feed-row{display:grid;grid-template-columns:150px 90px 1fr 90px;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line);font-size:13px;align-items:center;}
+  .feed-row:last-child{border-bottom:none;}
+  .feed-time{font-family:var(--font-mono);color:var(--text-dim);font-size:11.5px;}
+  .feed-num{font-family:var(--font-mono);font-size:12px;color:var(--text-dim);}
+
+  @media (max-width:760px){
+    .stat-grid{grid-template-columns:1fr 1fr;}
+    .cluster-row{grid-template-columns:1fr;gap:4px;}
+    .cluster-row.header{display:none;}
+    .feed-row{grid-template-columns:1fr;gap:2px;}
+    .currency-row{grid-template-columns:1fr;gap:2px;}
+    .currency-row.header{display:none;}
+  }
+
+  /* ---------- currency check view ---------- */
+  .dropzone{
+    border:2px dashed var(--line);border-radius:12px;padding:28px 20px;
+    text-align:center;cursor:pointer;transition:.15s;background:var(--panel-2);
+    margin-bottom:16px;
+  }
+  .dropzone:hover, .dropzone.dragover{border-color:var(--brand);background:var(--brand-bg);}
+  .dropzone-icon{font-size:28px;margin-bottom:8px;}
+  .dropzone-text{font-size:13.5px;color:var(--text-dim);}
+  .dropzone-text strong{color:var(--text);}
+  #currency-file-input{display:none;}
+  .preview-wrap{position:relative;margin-bottom:16px;display:none;}
+  .preview-wrap img{width:100%;max-height:280px;object-fit:contain;border-radius:10px;border:1px solid var(--line);background:#000;}
+  .remove-img-btn{
+    position:absolute;top:8px;right:8px;background:rgba(11,18,32,0.85);
+    color:white;border:1px solid var(--line);border-radius:7px;padding:6px 10px;
+    font-size:12px;cursor:pointer;
+  }
+  .disclaimer-box{
+    background:var(--caution-bg);border:1px solid rgba(240,169,59,0.3);
+    border-radius:9px;padding:12px 14px;font-size:12.5px;color:var(--caution);
+    line-height:1.6;margin-top:14px;
+  }
+  .denom-pill{
+    display:inline-block;font-family:var(--font-mono);font-weight:700;font-size:13px;
+    background:var(--panel-2);border:1px solid var(--line);padding:4px 10px;border-radius:7px;
+    margin-left:8px;
+  }
+  .currency-table{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:28px;}
+  .currency-row{display:grid;grid-template-columns:150px 90px 1fr 1fr;gap:12px;padding:12px 18px;border-bottom:1px solid var(--line);align-items:center;font-size:13px;}
+  .currency-row.header{background:var(--panel-2);font-size:10.5px;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-dim);font-weight:700;}
+  body.script-active .currency-row.header{text-transform:none;}
+  .currency-row:last-child{border-bottom:none;}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark">SG</div>
+      <div class="brand-text">
+        <div class="eyebrow" data-i18n="eyebrow">Digital Public Safety Intelligence — Prototype</div>
+        <h1>Suraksha Grid</h1>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="lang-select-wrap">
+        <label data-i18n="lang_label">Language</label>
+        <select id="global-lang">
+          <option value="en">English</option>
+          <option value="hi">हिंदी (Hindi)</option>
+          <option value="ta">தமிழ் (Tamil)</option>
+          <option value="te">తెలుగు (Telugu)</option>
+          <option value="bn">বাংলা (Bengali)</option>
+          <option value="mr">मराठी (Marathi)</option>
+          <option value="kn">ಕನ್ನಡ (Kannada)</option>
+          <option value="gu">ગુજરાતી (Gujarati)</option>
+          <option value="ml">മലയാളം (Malayalam)</option>
+          <option value="pa">ਪੰਜਾਬੀ (Punjabi)</option>
+          <option value="or">ଓଡ଼ିଆ (Odia)</option>
+          <option value="ur">اردو (Urdu)</option>
+        </select>
+      </div>
+      <div class="tabs">
+        <button class="tab-btn active" data-view="report" data-i18n="nav_report">Report a Contact</button>
+        <button class="tab-btn" data-view="currency" data-i18n="nav_currency">Currency Check</button>
+        <button class="tab-btn" data-view="command" data-i18n="nav_command">Command Center</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ REPORT VIEW ============ -->
+  <div class="view active" id="view-report">
+    <div class="report-layout">
+      <div class="card">
+        <h2 data-i18n="report_title">Is this a scam?</h2>
+        <p class="sub" data-i18n="report_sub">Tell us what's happening right now — during the call or message, not after. Takes 20 seconds. Your report also helps us track this operation before it reaches others.</p>
+
+        <div class="field">
+          <label data-i18n="label_number">Caller / sender number (if known)</label>
+          <input type="text" id="in-number" data-i18n-placeholder="placeholder_number" placeholder="e.g. +91 98XXX XXXXX or unknown" />
+        </div>
+
+        <div class="field">
+          <label data-i18n="label_claim">What are they claiming?</label>
+          <div class="chip-group" id="claim-chips">
+            <div class="chip" data-key="cbi" data-val="CBI / police / ED officer" data-i18n="chip_cbi">CBI / Police / ED</div>
+            <div class="chip" data-key="customs" data-val="Customs / courier parcel seized" data-i18n="chip_customs">Customs / Parcel</div>
+            <div class="chip" data-key="bank" data-val="Bank KYC or account block" data-i18n="chip_bank">Bank / KYC</div>
+            <div class="chip" data-key="investment" data-val="Trading or investment scheme" data-i18n="chip_investment">Investment scheme</div>
+            <div class="chip" data-key="utility" data-val="Electricity or utility disconnection" data-i18n="chip_utility">Utility bill</div>
+            <div class="chip" data-key="other" data-val="Something else" data-i18n="chip_other">Something else</div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label data-i18n="label_desc">Describe exactly what they said / asked for</label>
+          <textarea id="in-desc" data-i18n-placeholder="placeholder_desc" placeholder="e.g. Man in police uniform on video call, says my Aadhaar is linked to a drug case..."></textarea>
+        </div>
+
+        <div class="row2">
+          <div class="field">
+            <label data-i18n="label_method">Contact method</label>
+            <select id="in-method">
+              <option value="Video call" data-i18n="method_video">Video call</option>
+              <option value="Phone call" data-i18n="method_phone">Phone call</option>
+              <option value="WhatsApp message" data-i18n="method_whatsapp">WhatsApp message</option>
+              <option value="SMS" data-i18n="method_sms">SMS</option>
+              <option value="Email" data-i18n="method_email">Email</option>
+            </select>
+          </div>
+          <div class="field">
+            <label data-i18n="label_verdict_lang">Verdict will be shown in</label>
+            <input type="text" id="verdict-lang-display" disabled style="opacity:0.7;" />
+          </div>
+        </div>
+
+        <button class="submit-btn" id="btn-analyze" data-i18n="btn_analyze">Get instant verdict</button>
+      </div>
+
+      <div class="card result-card" id="result-card" style="display:none;"></div>
+    </div>
+  </div>
+
+  <!-- ============ CURRENCY CHECK VIEW ============ -->
+  <div class="view" id="view-currency">
+    <div class="report-layout">
+      <div class="card">
+        <h2 data-i18n="currency_title">Check a currency note</h2>
+        <p class="sub" data-i18n="currency_sub">Take a clear, well-lit photo of the note (both sides help) and we'll screen it for visible signs of counterfeiting — before you accept it or hand it to someone else.</p>
+
+        <div class="dropzone" id="dropzone">
+          <div class="dropzone-icon">📷</div>
+          <div class="dropzone-text"><span data-i18n="dropzone_text"><strong>Tap to upload</strong> a photo of the note</span></div>
+          <input type="file" id="currency-file-input" accept="image/*" capture="environment" />
+        </div>
+
+        <div class="preview-wrap" id="preview-wrap">
+          <img id="preview-img" src="" alt="Note preview" />
+          <button class="remove-img-btn" id="remove-img-btn" data-i18n="remove_image">✕ Remove</button>
+        </div>
+
+        <div class="field">
+          <label data-i18n="label_location">Where did you receive this note? (city / area — optional)</label>
+          <input type="text" id="in-location" data-i18n-placeholder="placeholder_location" placeholder="e.g. Lucknow, Aminabad market" />
+        </div>
+
+        <button class="submit-btn" id="btn-scan" data-i18n="btn_scan" disabled>Analyse note</button>
+      </div>
+
+      <div class="card result-card" id="currency-result-card" style="display:none;"></div>
+    </div>
+  </div>
+
+  <!-- ============ COMMAND CENTER VIEW ============ -->
+  <div class="view" id="view-command">
+
+    <div class="ticker-wrap">
+      <div class="ticker-label" data-i18n="ticker_label">LIVE FEED</div>
+      <div class="ticker-track" id="ticker-track"></div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <p class="stat-num" id="stat-total">0</p>
+        <div class="stat-label" data-i18n="stat_total">Total reports</div>
+      </div>
+      <div class="stat-card">
+        <p class="stat-num" id="stat-high" style="color:var(--danger);">0</p>
+        <div class="stat-label" data-i18n="stat_high">High-risk reports</div>
+      </div>
+      <div class="stat-card">
+        <p class="stat-num" id="stat-clusters" style="color:var(--caution);">0</p>
+        <div class="stat-label" data-i18n="stat_clusters">Active campaigns detected</div>
+      </div>
+      <div class="stat-card">
+        <p class="stat-num" id="stat-numbers">0</p>
+        <div class="stat-label" data-i18n="stat_numbers">Distinct numbers flagged</div>
+      </div>
+      <div class="stat-card">
+        <p class="stat-num" id="stat-currency-total">0</p>
+        <div class="stat-label" data-i18n="stat_currency_total">Notes screened</div>
+      </div>
+      <div class="stat-card">
+        <p class="stat-num" id="stat-currency-flagged" style="color:var(--danger);">0</p>
+        <div class="stat-label" data-i18n="stat_currency_flagged">Notes flagged suspicious</div>
+      </div>
+    </div>
+
+    <div class="section-title">
+      <span data-i18n="section_clusters">Active Campaign Clusters</span>
+      <button class="export-btn" id="btn-refresh" data-i18n="btn_refresh">↻ Refresh</button>
+    </div>
+    <div class="cluster-table" id="cluster-table">
+      <div class="cluster-row header">
+        <div data-i18n="col_id">Campaign ID</div><div data-i18n="col_type">Scam type / signature</div><div data-i18n="col_severity">Severity</div><div data-i18n="col_reports">Reports</div><div data-i18n="col_export">Export</div>
+      </div>
+      <div id="cluster-body"></div>
+    </div>
+
+    <div class="section-title"><span data-i18n="section_feed">Recent Reports (raw feed)</span></div>
+    <div class="reports-feed" id="reports-feed"></div>
+
+    <div class="section-title" style="margin-top:28px;"><span data-i18n="section_currency_feed">Recent Currency Checks</span></div>
+    <div class="currency-table" id="currency-table">
+      <div class="currency-row header">
+        <div data-i18n="col_time">Time</div><div data-i18n="col_denom">Denomination</div><div data-i18n="col_verdict">Verdict</div><div data-i18n="col_location">Location</div>
+      </div>
+      <div id="currency-body"></div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+/* ============================================================
+   SURAKSHA GRID — prototype logic with full multilingual UI
+   ============================================================ */
+
+const STORAGE_KEY_PREFIX = "fraudshield:report:";
+const CAMPAIGN_TIME_WINDOW_HRS = 72;
+
+/* ---------------- i18n dictionary ---------------- */
+/* Keys map to every static UI string. LLM output (advisory, red_flags,
+   scam_type, recommended_action) is generated live in the selected
+   language by the model itself — see classifyReport(). */
+const I18N = {
+en: {
+  eyebrow:"Digital Public Safety Intelligence — Prototype", lang_label:"Language",
+  nav_report:"Report a Contact", nav_command:"Command Center",
+  report_title:"Is this a scam?",
+  report_sub:"Tell us what's happening right now — during the call or message, not after. Takes 20 seconds. Your report also helps us track this operation before it reaches others.",
+  label_number:"Caller / sender number (if known)", placeholder_number:"e.g. +91 98XXX XXXXX or unknown",
+  label_claim:"What are they claiming?",
+  chip_cbi:"CBI / Police / ED", chip_customs:"Customs / Parcel", chip_bank:"Bank / KYC",
+  chip_investment:"Investment scheme", chip_utility:"Utility bill", chip_other:"Something else",
+  label_desc:"Describe exactly what they said / asked for",
+  placeholder_desc:"e.g. Man in police uniform on video call, says my Aadhaar is linked to a drug case, told me not to disconnect and to stay on video, is asking me to transfer money to a 'verification account'.",
+  label_method:"Contact method",
+  method_video:"Video call", method_phone:"Phone call", method_whatsapp:"WhatsApp message", method_sms:"SMS", method_email:"Email",
+  label_verdict_lang:"Verdict will be shown in", verdict_lang_value:"English",
+  btn_analyze:"Get instant verdict", btn_analyzing:"Analysing...",
+  alert_empty_desc:"Please describe what's happening — even a few words helps.",
+  loading_text:"Running risk classification…",
+  error_text:"Something went wrong analysing this report. Please try again, or if you are in immediate danger of sending money, stop and call 1930 (National Cybercrime Helpline) directly.",
+  verdict_high:"HIGH RISK — LIKELY SCAM", verdict_medium:"MEDIUM RISK — BE CAUTIOUS", verdict_low:"LOW RISK", verdict_unknown:"UNCERTAIN",
+  confidence_label:"CONFIDENCE",
+  flags_title_prefix:"Red flags detected —",
+  action_file:"File on cybercrime.gov.in →", action_call:"Call 1930 helpline",
+  note_suffix:"This report has been added (anonymised) to the live intelligence feed shown in the Command Center, so patterns across citizens can be detected before others are targeted.",
+  ticker_label:"LIVE FEED", ticker_empty:"No active multi-report campaigns yet — submit reports from the \"Report a Contact\" tab to populate the live feed.",
+  stat_total:"Total reports", stat_high:"High-risk reports", stat_clusters:"Active campaigns detected", stat_numbers:"Distinct numbers flagged",
+  section_clusters:"Active Campaign Clusters", btn_refresh:"↻ Refresh",
+  col_id:"Campaign ID", col_type:"Scam type / signature", col_severity:"Severity", col_reports:"Reports", col_export:"Export",
+  empty_clusters:"No active campaigns detected yet. Campaigns form automatically when 2+ citizens report the same number, or a single number is reported as high-risk.",
+  section_feed:"Recent Reports (raw feed)", empty_feed:"No reports submitted yet in this session.",
+  multiple_numbers:"multiple numbers", unknown_number:"unknown", unclassified:"Unclassified", packet_btn:"⬇ Packet",
+  report_count_suffix:"report", reports_count_suffix:"reports"
+},
+hi: {
+  eyebrow:"डिजिटल पब्लिक सेफ्टी इंटेलिजेंस — प्रोटोटाइप", lang_label:"भाषा",
+  nav_report:"संपर्क की रिपोर्ट करें", nav_command:"कमांड सेंटर",
+  report_title:"क्या यह धोखाधड़ी है?",
+  report_sub:"अभी जो हो रहा है वह बताएं — कॉल या मैसेज के दौरान, बाद में नहीं। सिर्फ 20 सेकंड लगेंगे। आपकी रिपोर्ट से हमें यह ऑपरेशन दूसरों तक पहुंचने से पहले पकड़ने में मदद मिलती है।",
+  label_number:"कॉल करने वाले का नंबर (यदि पता हो)", placeholder_number:"जैसे +91 98XXX XXXXX या अज्ञात",
+  label_claim:"वे क्या दावा कर रहे हैं?",
+  chip_cbi:"सीबीआई / पुलिस / ईडी", chip_customs:"कस्टम / पार्सल", chip_bank:"बैंक / केवाईसी",
+  chip_investment:"निवेश योजना", chip_utility:"बिजली/उपयोगिता बिल", chip_other:"कुछ और",
+  label_desc:"बताएं कि उन्होंने ठीक-ठीक क्या कहा / क्या मांगा",
+  placeholder_desc:"जैसे: वीडियो कॉल पर पुलिस वर्दी में व्यक्ति, कहता है कि मेरा आधार एक ड्रग केस से जुड़ा है, डिस्कनेक्ट न करने और वीडियो पर बने रहने को कहा, 'वेरिफिकेशन खाते' में पैसे भेजने को कह रहा है।",
+  label_method:"संपर्क का माध्यम",
+  method_video:"वीडियो कॉल", method_phone:"फोन कॉल", method_whatsapp:"व्हाट्सएप संदेश", method_sms:"एसएमएस", method_email:"ईमेल",
+  label_verdict_lang:"परिणाम इस भाषा में दिखाया जाएगा", verdict_lang_value:"हिंदी",
+  btn_analyze:"तुरंत परिणाम पाएं", btn_analyzing:"विश्लेषण हो रहा है...",
+  alert_empty_desc:"कृपया बताएं कि क्या हो रहा है — कुछ शब्द भी मदद करेंगे।",
+  loading_text:"जोखिम विश्लेषण चल रहा है…",
+  error_text:"इस रिपोर्ट का विश्लेषण करने में समस्या हुई। कृपया फिर से प्रयास करें, या यदि आप तुरंत पैसे भेजने वाले हैं, तो रुकें और सीधे 1930 (राष्ट्रीय साइबर क्राइम हेल्पलाइन) पर कॉल करें।",
+  verdict_high:"उच्च जोखिम — संभावित धोखाधड़ी", verdict_medium:"मध्यम जोखिम — सावधान रहें", verdict_low:"कम जोखिम", verdict_unknown:"अनिश्चित",
+  confidence_label:"विश्वास स्तर",
+  flags_title_prefix:"चेतावनी संकेत मिले —",
+  action_file:"cybercrime.gov.in पर रिपोर्ट करें →", action_call:"1930 हेल्पलाइन कॉल करें",
+  note_suffix:"यह रिपोर्ट (गुमनाम रूप से) कमांड सेंटर में दिखाए गए लाइव इंटेलिजेंस फीड में जोड़ी गई है, ताकि दूसरों को निशाना बनाए जाने से पहले पैटर्न का पता लगाया जा सके।",
+  ticker_label:"लाइव फीड", ticker_empty:"अभी तक कोई सक्रिय बहु-रिपोर्ट अभियान नहीं है — लाइव फीड भरने के लिए \"संपर्क की रिपोर्ट करें\" टैब से रिपोर्ट सबमिट करें।",
+  stat_total:"कुल रिपोर्टें", stat_high:"उच्च-जोखिम रिपोर्टें", stat_clusters:"सक्रिय अभियान पाए गए", stat_numbers:"अलग-अलग चिह्नित नंबर",
+  section_clusters:"सक्रिय अभियान समूह", btn_refresh:"↻ ताज़ा करें",
+  col_id:"अभियान आईडी", col_type:"धोखाधड़ी का प्रकार / संकेत", col_severity:"गंभीरता", col_reports:"रिपोर्टें", col_export:"निर्यात",
+  empty_clusters:"अभी तक कोई सक्रिय अभियान नहीं मिला। जब 2+ नागरिक एक ही नंबर की रिपोर्ट करते हैं, या किसी एक नंबर को उच्च-जोखिम के रूप में रिपोर्ट किया जाता है, तो अभियान अपने आप बनते हैं।",
+  section_feed:"हाल की रिपोर्टें (कच्चा फीड)", empty_feed:"इस सत्र में अभी तक कोई रिपोर्ट सबमिट नहीं हुई।",
+  multiple_numbers:"कई नंबर", unknown_number:"अज्ञात", unclassified:"अवर्गीकृत", packet_btn:"⬇ पैकेट",
+  report_count_suffix:"रिपोर्ट", reports_count_suffix:"रिपोर्टें"
+},
+ta: {
+  eyebrow:"டிஜிட்டல் பொது பாதுகாப்பு நுண்ணறிவு — முன்மாதிரி", lang_label:"மொழி",
+  nav_report:"தொடர்பை புகாரளிக்க", nav_command:"கட்டளை மையம்",
+  report_title:"இது மோசடியா?",
+  report_sub:"இப்போது என்ன நடக்கிறது என்று சொல்லுங்கள் — அழைப்பு அல்லது செய்தியின் போது, பின்னர் அல்ல. 20 வினாடிகள் மட்டுமே ஆகும். உங்கள் புகார் மற்றவர்களை பாதிக்கும் முன் இந்த செயல்பாட்டை கண்டறிய உதவுகிறது.",
+  label_number:"அழைப்பாளர் எண் (தெரிந்தால்)", placeholder_number:"எ.கா. +91 98XXX XXXXX அல்லது தெரியவில்லை",
+  label_claim:"அவர்கள் என்ன கூறுகிறார்கள்?",
+  chip_cbi:"சிபிஐ / போலீஸ் / ஈடி", chip_customs:"சுங்கம் / பார்சல்", chip_bank:"வங்கி / கேஒய்சி",
+  chip_investment:"முதலீட்டு திட்டம்", chip_utility:"மின்சார பில்", chip_other:"வேறு ஏதாவது",
+  label_desc:"அவர்கள் சரியாக என்ன சொன்னார்கள் / கேட்டார்கள் என்பதை விவரிக்கவும்",
+  placeholder_desc:"எ.கா. வீடியோ கால்-இல் போலீஸ் சீருடையில் ஒருவர், எனது ஆதார் ஒரு போதைப் பொருள் வழக்குடன் இணைக்கப்பட்டுள்ளது என்று கூறுகிறார், துண்டிக்க வேண்டாம் என்றும் வீடியோவில் இருக்க வேண்டும் என்றும் கூறினார்.",
+  label_method:"தொடர்பு முறை",
+  method_video:"வீடியோ அழைப்பு", method_phone:"தொலைபேசி அழைப்பு", method_whatsapp:"வாட்ஸ்அப் செய்தி", method_sms:"எஸ்எம்எஸ்", method_email:"மின்னஞ்சல்",
+  label_verdict_lang:"முடிவு இந்த மொழியில் காட்டப்படும்", verdict_lang_value:"தமிழ்",
+  btn_analyze:"உடனடி முடிவைப் பெறுங்கள்", btn_analyzing:"பகுப்பாய்வு செய்யப்படுகிறது...",
+  alert_empty_desc:"என்ன நடக்கிறது என்பதை விவரிக்கவும் — சில வார்த்தைகள் கூட உதவும்.",
+  loading_text:"ஆபத்து வகைப்பாடு நடைபெறுகிறது…",
+  error_text:"இந்த புகாரை பகுப்பாய்வு செய்வதில் சிக்கல் ஏற்பட்டது. மீண்டும் முயற்சிக்கவும், அல்லது நீங்கள் உடனடியாக பணம் அனுப்பும் ஆபத்தில் இருந்தால், நிறுத்தி 1930 (தேசிய சைபர் கிரைம் ஹெல்ப்லைன்) ஐ நேரடியாக அழைக்கவும்.",
+  verdict_high:"அதிக ஆபத்து — மோசடியாக இருக்கலாம்", verdict_medium:"நடுத்தர ஆபத்து — கவனமாக இருங்கள்", verdict_low:"குறைந்த ஆபத்து", verdict_unknown:"நிச்சயமற்றது",
+  confidence_label:"நம்பகத்தன்மை",
+  flags_title_prefix:"கண்டறியப்பட்ட எச்சரிக்கை அறிகுறிகள் —",
+  action_file:"cybercrime.gov.in இல் புகாரளிக்கவும் →", action_call:"1930 ஹெல்ப்லைனை அழைக்கவும்",
+  note_suffix:"இந்த புகார் (அடையாளம் இல்லாமல்) கட்டளை மையத்தில் காட்டப்படும் நேரடி நுண்ணறிவு ஊட்டத்தில் சேர்க்கப்பட்டுள்ளது.",
+  ticker_label:"நேரடி ஊட்டம்", ticker_empty:"இதுவரை செயலில் உள்ள பல-புகார் பிரச்சாரங்கள் இல்லை.",
+  stat_total:"மொத்த புகார்கள்", stat_high:"அதிக ஆபத்து புகார்கள்", stat_clusters:"செயலில் உள்ள பிரச்சாரங்கள்", stat_numbers:"தனித்த எண்கள் கண்டறியப்பட்டன",
+  section_clusters:"செயலில் உள்ள பிரச்சார கிளஸ்டர்கள்", btn_refresh:"↻ புதுப்பிக்க",
+  col_id:"பிரச்சார ஐடி", col_type:"மோசடி வகை", col_severity:"தீவிரம்", col_reports:"புகார்கள்", col_export:"ஏற்றுமதி",
+  empty_clusters:"இதுவரை செயலில் உள்ள பிரச்சாரங்கள் கண்டறியப்படவில்லை.",
+  section_feed:"சமீபத்திய புகார்கள்", empty_feed:"இந்த அமர்வில் இதுவரை புகார்கள் எதுவும் சமர்ப்பிக்கப்படவில்லை.",
+  multiple_numbers:"பல எண்கள்", unknown_number:"தெரியவில்லை", unclassified:"வகைப்படுத்தப்படாதது", packet_btn:"⬇ பாக்கெட்",
+  report_count_suffix:"புகார்", reports_count_suffix:"புகார்கள்"
+},
+te: {
+  eyebrow:"డిజిటల్ పబ్లిక్ సేఫ్టీ ఇంటెలిజెన్స్ — ప్రోటోటైప్", lang_label:"భాష",
+  nav_report:"సంప్రదింపును నివేదించండి", nav_command:"కమాండ్ సెంటర్",
+  report_title:"ఇది మోసమా?",
+  report_sub:"ఇప్పుడు ఏమి జరుగుతుందో చెప్పండి — కాల్ లేదా సందేశం సమయంలో, తర్వాత కాదు. కేవలం 20 సెకన్లు పడుతుంది.",
+  label_number:"కాలర్ నంబర్ (తెలిస్తే)", placeholder_number:"ఉదా. +91 98XXX XXXXX లేదా తెలియదు",
+  label_claim:"వారు ఏమి క్లెయిమ్ చేస్తున్నారు?",
+  chip_cbi:"సిబిఐ / పోలీస్ / ఇడి", chip_customs:"కస్టమ్స్ / పార్శిల్", chip_bank:"బ్యాంక్ / కేవైసీ",
+  chip_investment:"పెట్టుబడి పథకం", chip_utility:"విద్యుత్ బిల్లు", chip_other:"మరేదైనా",
+  label_desc:"వారు సరిగ్గా ఏమి చెప్పారు / అడిగారు అనేది వివరించండి",
+  placeholder_desc:"ఉదా: వీడియో కాల్‌లో పోలీస్ యూనిఫారంలో ఉన్న వ్యక్తి, నా ఆధార్ డ్రగ్ కేసుతో ముడిపడి ఉందని, డిస్‌కనెక్ట్ చేయవద్దని, వెరిఫికేషన్ ఖాతాకు డబ్బు పంపమని అడుగుతున్నాడు.",
+  label_method:"సంప్రదింపు విధానం",
+  method_video:"వీడియో కాల్", method_phone:"ఫోన్ కాల్", method_whatsapp:"వాట్సాప్ సందేశం", method_sms:"ఎస్ఎంఎస్", method_email:"ఇమెయిల్",
+  label_verdict_lang:"ఫలితం ఈ భాషలో చూపబడుతుంది", verdict_lang_value:"తెలుగు",
+  btn_analyze:"తక్షణ ఫలితం పొందండి", btn_analyzing:"విశ్లేషణ జరుగుతోంది...",
+  alert_empty_desc:"ఏమి జరుగుతుందో దయచేసి వివరించండి — కొన్ని పదాలు కూడా సహాయపడతాయి.",
+  loading_text:"రిస్క్ వర్గీకరణ నడుస్తోంది…",
+  error_text:"ఈ నివేదికను విశ్లేషించడంలో సమస్య వచ్చింది. దయచేసి మళ్లీ ప్రయత్నించండి, లేదా మీరు వెంటనే డబ్బు పంపే ప్రమాదంలో ఉంటే, ఆపి నేరుగా 1930కి కాల్ చేయండి.",
+  verdict_high:"అధిక ప్రమాదం — మోసం అయ్యుండొచ్చు", verdict_medium:"మధ్యస్థ ప్రమాదం — జాగ్రత్తగా ఉండండి", verdict_low:"తక్కువ ప్రమాదం", verdict_unknown:"అనిశ్చితం",
+  confidence_label:"విశ్వాసం",
+  flags_title_prefix:"గుర్తించిన హెచ్చరిక సంకేతాలు —",
+  action_file:"cybercrime.gov.in లో నివేదించండి →", action_call:"1930 హెల్ప్‌లైన్‌కు కాల్ చేయండి",
+  note_suffix:"ఈ నివేదిక (అనామకంగా) కమాండ్ సెంటర్‌లో చూపబడే లైవ్ ఇంటెలిజెన్స్ ఫీడ్‌కు జోడించబడింది.",
+  ticker_label:"లైవ్ ఫీడ్", ticker_empty:"ఇంకా క్రియాశీల బహుళ-నివేదిక ప్రచారాలు లేవు.",
+  stat_total:"మొత్తం నివేదికలు", stat_high:"అధిక-ప్రమాద నివేదికలు", stat_clusters:"క్రియాశీల ప్రచారాలు గుర్తించబడ్డాయి", stat_numbers:"ప్రత్యేక నంబర్లు గుర్తించబడ్డాయి",
+  section_clusters:"క్రియాశీల ప్రచార క్లస్టర్లు", btn_refresh:"↻ రిఫ్రెష్",
+  col_id:"ప్రచార ఐడి", col_type:"మోసం రకం", col_severity:"తీవ్రత", col_reports:"నివేదికలు", col_export:"ఎగుమతి",
+  empty_clusters:"ఇంకా క్రియాశీల ప్రచారాలు గుర్తించబడలేదు.",
+  section_feed:"ఇటీవలి నివేదికలు", empty_feed:"ఈ సెషన్‌లో ఇంకా నివేదికలు సమర్పించబడలేదు.",
+  multiple_numbers:"బహుళ నంబర్లు", unknown_number:"తెలియదు", unclassified:"వర్గీకరించబడలేదు", packet_btn:"⬇ ప్యాకెట్",
+  report_count_suffix:"నివేదిక", reports_count_suffix:"నివేదికలు"
+},
+bn: {
+  eyebrow:"ডিজিটাল পাবলিক সেফটি ইন্টেলিজেন্স — প্রোটোটাইপ", lang_label:"ভাষা",
+  nav_report:"যোগাযোগের রিপোর্ট করুন", nav_command:"কমান্ড সেন্টার",
+  report_title:"এটা কি প্রতারণা?",
+  report_sub:"এখন কী ঘটছে তা বলুন — কল বা বার্তার সময়, পরে নয়। মাত্র ২০ সেকেন্ড লাগবে।",
+  label_number:"কলার/প্রেরকের নম্বর (জানা থাকলে)", placeholder_number:"যেমন +91 98XXX XXXXX অথবা অজানা",
+  label_claim:"তারা কী দাবি করছে?",
+  chip_cbi:"সিবিআই / পুলিশ / ইডি", chip_customs:"কাস্টমস / পার্সেল", chip_bank:"ব্যাংক / কেওয়াইসি",
+  chip_investment:"বিনিয়োগ প্রকল্প", chip_utility:"বিদ্যুৎ বিল", chip_other:"অন্য কিছু",
+  label_desc:"তারা ঠিক কী বলেছে / চেয়েছে তা বর্ণনা করুন",
+  placeholder_desc:"যেমন: ভিডিও কলে পুলিশের পোশাকে একজন ব্যক্তি বলছেন আমার আধার একটি মাদক মামলার সাথে যুক্ত, সংযোগ বিচ্ছিন্ন না করতে বলেছেন, 'ভেরিফিকেশন অ্যাকাউন্টে' টাকা পাঠাতে বলছেন।",
+  label_method:"যোগাযোগের মাধ্যম",
+  method_video:"ভিডিও কল", method_phone:"ফোন কল", method_whatsapp:"হোয়াটসঅ্যাপ বার্তা", method_sms:"এসএমএস", method_email:"ইমেইল",
+  label_verdict_lang:"ফলাফল এই ভাষায় দেখানো হবে", verdict_lang_value:"বাংলা",
+  btn_analyze:"তাৎক্ষণিক রায় পান", btn_analyzing:"বিশ্লেষণ চলছে...",
+  alert_empty_desc:"দয়া করে কী ঘটছে তা বর্ণনা করুন — কয়েকটি শব্দও সাহায্য করবে।",
+  loading_text:"ঝুঁকি শ্রেণীবিভাগ চলছে…",
+  error_text:"এই রিপোর্ট বিশ্লেষণে সমস্যা হয়েছে। আবার চেষ্টা করুন, অথবা যদি আপনি এখনই টাকা পাঠানোর ঝুঁকিতে থাকেন, থামুন এবং সরাসরি 1930 নম্বরে কল করুন।",
+  verdict_high:"উচ্চ ঝুঁকি — সম্ভাব্য প্রতারণা", verdict_medium:"মাঝারি ঝুঁকি — সতর্ক থাকুন", verdict_low:"কম ঝুঁকি", verdict_unknown:"অনিশ্চিত",
+  confidence_label:"আত্মবিশ্বাস",
+  flags_title_prefix:"সনাক্তকৃত সতর্কতা সংকেত —",
+  action_file:"cybercrime.gov.in-এ রিপোর্ট করুন →", action_call:"1930 হেল্পলাইনে কল করুন",
+  note_suffix:"এই রিপোর্টটি (বেনামে) কমান্ড সেন্টারে দেখানো লাইভ ইন্টেলিজেন্স ফিডে যোগ করা হয়েছে।",
+  ticker_label:"লাইভ ফিড", ticker_empty:"এখনও কোনো সক্রিয় বহু-প্রতিবেদন প্রচারণা নেই।",
+  stat_total:"মোট রিপোর্ট", stat_high:"উচ্চ-ঝুঁকির রিপোর্ট", stat_clusters:"সক্রিয় প্রচারণা সনাক্ত", stat_numbers:"স্বতন্ত্র নম্বর চিহ্নিত",
+  section_clusters:"সক্রিয় প্রচারণা ক্লাস্টার", btn_refresh:"↻ রিফ্রেশ",
+  col_id:"প্রচারণা আইডি", col_type:"প্রতারণার ধরন", col_severity:"তীব্রতা", col_reports:"রিপোর্ট", col_export:"রপ্তানি",
+  empty_clusters:"এখনও কোনো সক্রিয় প্রচারণা সনাক্ত হয়নি।",
+  section_feed:"সাম্প্রতিক রিপোর্ট", empty_feed:"এই সেশনে এখনও কোনো রিপোর্ট জমা দেওয়া হয়নি।",
+  multiple_numbers:"একাধিক নম্বর", unknown_number:"অজানা", unclassified:"অশ্রেণীবদ্ধ", packet_btn:"⬇ প্যাকেট",
+  report_count_suffix:"রিপোর্ট", reports_count_suffix:"রিপোর্ট"
+},
+mr: {
+  eyebrow:"डिजिटल पब्लिक सेफ्टी इंटेलिजन्स — प्रोटोटाइप", lang_label:"भाषा",
+  nav_report:"संपर्काची तक्रार करा", nav_command:"कमांड सेंटर",
+  report_title:"ही फसवणूक आहे का?",
+  report_sub:"आत्ता काय घडत आहे ते सांगा — कॉल किंवा मेसेजच्या वेळी, नंतर नाही. फक्त 20 सेकंद लागतील.",
+  label_number:"कॉल करणाऱ्याचा नंबर (माहीत असल्यास)", placeholder_number:"उदा. +91 98XXX XXXXX किंवा अज्ञात",
+  label_claim:"ते काय दावा करत आहेत?",
+  chip_cbi:"सीबीआय / पोलीस / ईडी", chip_customs:"कस्टम्स / पार्सल", chip_bank:"बँक / केवायसी",
+  chip_investment:"गुंतवणूक योजना", chip_utility:"वीज बिल", chip_other:"आणखी काही",
+  label_desc:"त्यांनी नेमके काय सांगितले / मागितले ते वर्णन करा",
+  placeholder_desc:"उदा: व्हिडिओ कॉलवर पोलिस वेशातील व्यक्ती, माझे आधार अमली पदार्थांच्या प्रकरणाशी जोडलेले आहे असे सांगत आहे, डिस्कनेक्ट न करण्यास आणि व्हिडिओवर राहण्यास सांगितले, 'व्हेरिफिकेशन खात्यात' पैसे पाठवण्यास सांगत आहे.",
+  label_method:"संपर्क माध्यम",
+  method_video:"व्हिडिओ कॉल", method_phone:"फोन कॉल", method_whatsapp:"व्हॉट्सअॅप संदेश", method_sms:"एसएमएस", method_email:"ईमेल",
+  label_verdict_lang:"निकाल या भाषेत दाखवला जाईल", verdict_lang_value:"मराठी",
+  btn_analyze:"त्वरित निकाल मिळवा", btn_analyzing:"विश्लेषण चालू आहे...",
+  alert_empty_desc:"कृपया काय घडत आहे ते सांगा — काही शब्दही उपयोगी ठरतील.",
+  loading_text:"धोका वर्गीकरण चालू आहे…",
+  error_text:"या तक्रारीचे विश्लेषण करताना समस्या आली. कृपया पुन्हा प्रयत्न करा, किंवा तुम्ही लगेच पैसे पाठवण्याच्या धोक्यात असाल, तर थांबा आणि थेट 1930 वर कॉल करा.",
+  verdict_high:"उच्च धोका — फसवणूक असण्याची शक्यता", verdict_medium:"मध्यम धोका — सावध रहा", verdict_low:"कमी धोका", verdict_unknown:"अनिश्चित",
+  confidence_label:"विश्वासार्हता",
+  flags_title_prefix:"आढळलेले धोक्याचे संकेत —",
+  action_file:"cybercrime.gov.in वर तक्रार करा →", action_call:"1930 हेल्पलाइनला कॉल करा",
+  note_suffix:"ही तक्रार (निनावीपणे) कमांड सेंटरमध्ये दाखवलेल्या लाइव्ह इंटेलिजन्स फीडमध्ये जोडली गेली आहे.",
+  ticker_label:"लाइव्ह फीड", ticker_empty:"अद्याप कोणतीही सक्रिय बहु-तक्रार मोहीम नाही.",
+  stat_total:"एकूण तक्रारी", stat_high:"उच्च-धोका तक्रारी", stat_clusters:"सक्रिय मोहिमा आढळल्या", stat_numbers:"वेगळे चिन्हांकित नंबर",
+  section_clusters:"सक्रिय मोहीम गट", btn_refresh:"↻ रिफ्रेश",
+  col_id:"मोहीम आयडी", col_type:"फसवणुकीचा प्रकार", col_severity:"तीव्रता", col_reports:"तक्रारी", col_export:"निर्यात",
+  empty_clusters:"अद्याप कोणतीही सक्रिय मोहीम आढळली नाही.",
+  section_feed:"अलीकडील तक्रारी", empty_feed:"या सत्रात अद्याप कोणतीही तक्रार सादर केलेली नाही.",
+  multiple_numbers:"अनेक नंबर", unknown_number:"अज्ञात", unclassified:"अवर्गीकृत", packet_btn:"⬇ पॅकेट",
+  report_count_suffix:"तक्रार", reports_count_suffix:"तक्रारी"
+},
+kn: {
+  eyebrow:"ಡಿಜಿಟಲ್ ಪಬ್ಲಿಕ್ ಸೇಫ್ಟಿ ಇಂಟೆಲಿಜೆನ್ಸ್ — ಪ್ರೋಟೋಟೈಪ್", lang_label:"ಭಾಷೆ",
+  nav_report:"ಸಂಪರ್ಕವನ್ನು ವರದಿ ಮಾಡಿ", nav_command:"ಕಮಾಂಡ್ ಸೆಂಟರ್",
+  report_title:"ಇದು ವಂಚನೆಯೇ?",
+  report_sub:"ಈಗ ಏನಾಗುತ್ತಿದೆ ಎಂದು ಹೇಳಿ — ಕರೆ ಅಥವಾ ಸಂದೇಶದ ಸಮಯದಲ್ಲಿ, ನಂತರ ಅಲ್ಲ. ಕೇವಲ 20 ಸೆಕೆಂಡುಗಳು ಬೇಕಾಗುತ್ತದೆ.",
+  label_number:"ಕರೆ ಮಾಡಿದವರ ಸಂಖ್ಯೆ (ತಿಳಿದಿದ್ದರೆ)", placeholder_number:"ಉದಾ. +91 98XXX XXXXX ಅಥವಾ ಗೊತ್ತಿಲ್ಲ",
+  label_claim:"ಅವರು ಏನು ಹೇಳಿಕೊಳ್ಳುತ್ತಿದ್ದಾರೆ?",
+  chip_cbi:"ಸಿಬಿಐ / ಪೊಲೀಸ್ / ಇಡಿ", chip_customs:"ಕಸ್ಟಮ್ಸ್ / ಪಾರ್ಸೆಲ್", chip_bank:"ಬ್ಯಾಂಕ್ / ಕೆವೈಸಿ",
+  chip_investment:"ಹೂಡಿಕೆ ಯೋಜನೆ", chip_utility:"ವಿದ್ಯುತ್ ಬಿಲ್", chip_other:"ಬೇರೆ ಏನಾದರೂ",
+  label_desc:"ಅವರು ನಿಖರವಾಗಿ ಏನು ಹೇಳಿದರು / ಕೇಳಿದರು ಎಂದು ವಿವರಿಸಿ",
+  placeholder_desc:"ಉದಾ: ವೀಡಿಯೊ ಕರೆಯಲ್ಲಿ ಪೊಲೀಸ್ ಸಮವಸ್ತ್ರದಲ್ಲಿರುವ ವ್ಯಕ್ತಿ, ನನ್ನ ಆಧಾರ್ ಮಾದಕವಸ್ತು ಪ್ರಕರಣಕ್ಕೆ ಸಂಬಂಧಿಸಿದೆ ಎಂದು ಹೇಳುತ್ತಿದ್ದಾರೆ.",
+  label_method:"ಸಂಪರ್ಕ ವಿಧಾನ",
+  method_video:"ವೀಡಿಯೊ ಕರೆ", method_phone:"ಫೋನ್ ಕರೆ", method_whatsapp:"ವಾಟ್ಸಾಪ್ ಸಂದೇಶ", method_sms:"ಎಸ್ಎಂಎಸ್", method_email:"ಇಮೇಲ್",
+  label_verdict_lang:"ಫಲಿತಾಂಶವನ್ನು ಈ ಭಾಷೆಯಲ್ಲಿ ತೋರಿಸಲಾಗುತ್ತದೆ", verdict_lang_value:"ಕನ್ನಡ",
+  btn_analyze:"ತಕ್ಷಣದ ತೀರ್ಪು ಪಡೆಯಿರಿ", btn_analyzing:"ವಿಶ್ಲೇಷಣೆ ನಡೆಯುತ್ತಿದೆ...",
+  alert_empty_desc:"ದಯವಿಟ್ಟು ಏನಾಗುತ್ತಿದೆ ಎಂದು ವಿವರಿಸಿ.",
+  loading_text:"ಅಪಾಯ ವರ್ಗೀಕರಣ ನಡೆಯುತ್ತಿದೆ…",
+  error_text:"ಈ ವರದಿಯನ್ನು ವಿಶ್ಲೇಷಿಸುವಲ್ಲಿ ಸಮಸ್ಯೆಯಾಯಿತು. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ, ಅಥವಾ ನೀವು ತಕ್ಷಣ ಹಣ ಕಳುಹಿಸುವ ಅಪಾಯದಲ್ಲಿದ್ದರೆ, ನಿಲ್ಲಿಸಿ ಮತ್ತು ನೇರವಾಗಿ 1930 ಗೆ ಕರೆ ಮಾಡಿ.",
+  verdict_high:"ಹೆಚ್ಚಿನ ಅಪಾಯ — ಸಂಭವನೀಯ ವಂಚನೆ", verdict_medium:"ಮಧ್ಯಮ ಅಪಾಯ — ಎಚ್ಚರಿಕೆಯಿಂದಿರಿ", verdict_low:"ಕಡಿಮೆ ಅಪಾಯ", verdict_unknown:"ಅನಿಶ್ಚಿತ",
+  confidence_label:"ವಿಶ್ವಾಸಾರ್ಹತೆ",
+  flags_title_prefix:"ಪತ್ತೆಯಾದ ಎಚ್ಚರಿಕೆ ಸಂಕೇತಗಳು —",
+  action_file:"cybercrime.gov.in ನಲ್ಲಿ ವರದಿ ಮಾಡಿ →", action_call:"1930 ಹೆಲ್ಪ್‌ಲೈನ್‌ಗೆ ಕರೆ ಮಾಡಿ",
+  note_suffix:"ಈ ವರದಿಯನ್ನು (ಅನಾಮಧೇಯವಾಗಿ) ಕಮಾಂಡ್ ಸೆಂಟರ್‌ನಲ್ಲಿ ತೋರಿಸಲಾದ ಲೈವ್ ಇಂಟೆಲಿಜೆನ್ಸ್ ಫೀಡ್‌ಗೆ ಸೇರಿಸಲಾಗಿದೆ.",
+  ticker_label:"ಲೈವ್ ಫೀಡ್", ticker_empty:"ಇನ್ನೂ ಯಾವುದೇ ಸಕ್ರಿಯ ಬಹು-ವರದಿ ಅಭಿಯಾನಗಳಿಲ್ಲ.",
+  stat_total:"ಒಟ್ಟು ವರದಿಗಳು", stat_high:"ಹೆಚ್ಚಿನ-ಅಪಾಯದ ವರದಿಗಳು", stat_clusters:"ಸಕ್ರಿಯ ಅಭಿಯಾನಗಳು ಪತ್ತೆಯಾಗಿವೆ", stat_numbers:"ವಿಶಿಷ್ಟ ಸಂಖ್ಯೆಗಳು ಗುರುತಿಸಲ್ಪಟ್ಟಿವೆ",
+  section_clusters:"ಸಕ್ರಿಯ ಅಭಿಯಾನ ಕ್ಲಸ್ಟರ್‌ಗಳು", btn_refresh:"↻ ರಿಫ್ರೆಶ್",
+  col_id:"ಅಭಿಯಾನ ಐಡಿ", col_type:"ವಂಚನೆಯ ಪ್ರಕಾರ", col_severity:"ತೀವ್ರತೆ", col_reports:"ವರದಿಗಳು", col_export:"ರಫ್ತು",
+  empty_clusters:"ಇನ್ನೂ ಯಾವುದೇ ಸಕ್ರಿಯ ಅಭಿಯಾನಗಳು ಪತ್ತೆಯಾಗಿಲ್ಲ.",
+  section_feed:"ಇತ್ತೀಚಿನ ವರದಿಗಳು", empty_feed:"ಈ ಅಧಿವೇಶನದಲ್ಲಿ ಇನ್ನೂ ಯಾವುದೇ ವರದಿಗಳನ್ನು ಸಲ್ಲಿಸಲಾಗಿಲ್ಲ.",
+  multiple_numbers:"ಬಹು ಸಂಖ್ಯೆಗಳು", unknown_number:"ಗೊತ್ತಿಲ್ಲ", unclassified:"ವರ್ಗೀಕರಿಸದ", packet_btn:"⬇ ಪ್ಯಾಕೆಟ್",
+  report_count_suffix:"ವರದಿ", reports_count_suffix:"ವರದಿಗಳು"
+},
+gu: {
+  eyebrow:"ડિજિટલ પબ્લિક સેફ્ટી ઇન્ટેલિજન્સ — પ્રોટોટાઇપ", lang_label:"ભાષા",
+  nav_report:"સંપર્કની જાણ કરો", nav_command:"કમાન્ડ સેન્ટર",
+  report_title:"શું આ છેતરપિંડી છે?",
+  report_sub:"અત્યારે શું થઈ રહ્યું છે તે જણાવો — કૉલ અથવા મેસેજ દરમિયાન, પછી નહીં. ફક્ત 20 સેકન્ડ લાગશે.",
+  label_number:"કૉલ કરનારનો નંબર (જો ખબર હોય)", placeholder_number:"દા.ત. +91 98XXX XXXXX અથવા અજ્ઞાત",
+  label_claim:"તેઓ શું દાવો કરી રહ્યા છે?",
+  chip_cbi:"સીબીઆઈ / પોલીસ / ઈડી", chip_customs:"કસ્ટમ્સ / પાર્સલ", chip_bank:"બેંક / કેવાયસી",
+  chip_investment:"રોકાણ યોજના", chip_utility:"વીજળી બિલ", chip_other:"બીજું કંઈક",
+  label_desc:"તેમણે બરાબર શું કહ્યું / માંગ્યું તેનું વર્ણન કરો",
+  placeholder_desc:"દા.ત.: વિડિયો કૉલ પર પોલીસ યુનિફોર્મમાં વ્યક્તિ, કહે છે કે મારું આધાર ડ્રગ કેસ સાથે જોડાયેલું છે, ડિસ્કનેક્ટ ન કરવા અને વિડિયો પર રહેવા કહ્યું.",
+  label_method:"સંપર્ક પદ્ધતિ",
+  method_video:"વિડિયો કૉલ", method_phone:"ફોન કૉલ", method_whatsapp:"વોટ્સએપ સંદેશ", method_sms:"એસએમએસ", method_email:"ઈમેલ",
+  label_verdict_lang:"પરિણામ આ ભાષામાં બતાવવામાં આવશે", verdict_lang_value:"ગુજરાતી",
+  btn_analyze:"તાત્કાલિક ચુકાદો મેળવો", btn_analyzing:"વિશ્લેષણ ચાલી રહ્યું છે...",
+  alert_empty_desc:"કૃપા કરી શું થઈ રહ્યું છે તે વર્ણવો.",
+  loading_text:"જોખમ વર્ગીકરણ ચાલી રહ્યું છે…",
+  error_text:"આ રિપોર્ટનું વિશ્લેષણ કરવામાં સમસ્યા આવી. કૃપા કરી ફરી પ્રયાસ કરો, અથવા જો તમે તરત જ પૈસા મોકલવાના જોખમમાં હોવ, તો રોકાઈ જાઓ અને સીધા 1930 પર કૉલ કરો.",
+  verdict_high:"ઉચ્ચ જોખમ — છેતરપિંડી હોવાની શક્યતા", verdict_medium:"મધ્યમ જોખમ — સાવચેત રહો", verdict_low:"ઓછું જોખમ", verdict_unknown:"અનિશ્ચિત",
+  confidence_label:"વિશ્વાસ",
+  flags_title_prefix:"શોધાયેલા ચેતવણી સંકેતો —",
+  action_file:"cybercrime.gov.in પર જાણ કરો →", action_call:"1930 હેલ્પલાઇનને કૉલ કરો",
+  note_suffix:"આ રિપોર્ટ (અનામી રીતે) કમાન્ડ સેન્ટરમાં બતાવેલા લાઇવ ઇન્ટેલિજન્સ ફીડમાં ઉમેરવામાં આવ્યો છે.",
+  ticker_label:"લાઇવ ફીડ", ticker_empty:"હજુ સુધી કોઈ સક્રિય બહુ-રિપોર્ટ ઝુંબેશ નથી.",
+  stat_total:"કુલ રિપોર્ટ્સ", stat_high:"ઉચ્ચ-જોખમ રિપોર્ટ્સ", stat_clusters:"સક્રિય ઝુંબેશ મળી", stat_numbers:"અલગ નંબરો ફ્લેગ કરાયા",
+  section_clusters:"સક્રિય ઝુંબેશ ક્લસ્ટર્સ", btn_refresh:"↻ તાજું કરો",
+  col_id:"ઝુંબેશ આઈડી", col_type:"છેતરપિંડીનો પ્રકાર", col_severity:"તીવ્રતા", col_reports:"રિપોર્ટ્સ", col_export:"નિકાસ",
+  empty_clusters:"હજુ સુધી કોઈ સક્રિય ઝુંબેશ મળી નથી.",
+  section_feed:"તાજેતરના રિપોર્ટ્સ", empty_feed:"આ સત્રમાં હજુ સુધી કોઈ રિપોર્ટ સબમિટ કરવામાં આવ્યો નથી.",
+  multiple_numbers:"ઘણા નંબરો", unknown_number:"અજ્ઞાત", unclassified:"અવર્ગીકૃત", packet_btn:"⬇ પેકેટ",
+  report_count_suffix:"રિપોર્ટ", reports_count_suffix:"રિપોર્ટ્સ"
+},
+ml: {
+  eyebrow:"ഡിജിറ്റൽ പബ്ലിക് സേഫ്റ്റി ഇന്റലിജൻസ് — പ്രോട്ടോടൈപ്പ്", lang_label:"ഭാഷ",
+  nav_report:"ബന്ധപ്പെടൽ റിപ്പോർട്ട് ചെയ്യുക", nav_command:"കമാൻഡ് സെന്റർ",
+  report_title:"ഇത് തട്ടിപ്പാണോ?",
+  report_sub:"ഇപ്പോൾ എന്താണ് സംഭവിക്കുന്നതെന്ന് പറയുക — കോളിനിടയിലോ സന്ദേശത്തിനിടയിലോ, പിന്നീടല്ല. 20 സെക്കൻഡ് മാത്രം മതി.",
+  label_number:"വിളിച്ചയാളുടെ നമ്പർ (അറിയാമെങ്കിൽ)", placeholder_number:"ഉദാ. +91 98XXX XXXXX അല്ലെങ്കിൽ അജ്ഞാതം",
+  label_claim:"അവർ എന്താണ് അവകാശപ്പെടുന്നത്?",
+  chip_cbi:"സിബിഐ / പോലീസ് / ഇഡി", chip_customs:"കസ്റ്റംസ് / പാഴ്സൽ", chip_bank:"ബാങ്ക് / കെവൈസി",
+  chip_investment:"നിക്ഷേപ പദ്ധതി", chip_utility:"വൈദ്യുതി ബിൽ", chip_other:"മറ്റെന്തെങ്കിലും",
+  label_desc:"അവർ കൃത്യമായി എന്താണ് പറഞ്ഞത് / ആവശ്യപ്പെട്ടത് എന്ന് വിവരിക്കുക",
+  placeholder_desc:"ഉദാ: വീഡിയോ കോളിൽ പോലീസ് യൂണിഫോമിലുള്ള ഒരാൾ, എന്റെ ആധാർ ഒരു മയക്കുമരുന്ന് കേസുമായി ബന്ധപ്പെട്ടിരിക്കുന്നു എന്ന് പറയുന്നു.",
+  label_method:"ബന്ധപ്പെടൽ രീതി",
+  method_video:"വീഡിയോ കോൾ", method_phone:"ഫോൺ കോൾ", method_whatsapp:"വാട്സ്ആപ്പ് സന്ദേശം", method_sms:"എസ്എംഎസ്", method_email:"ഇമെയിൽ",
+  label_verdict_lang:"ഫലം ഈ ഭാഷയിൽ കാണിക്കും", verdict_lang_value:"മലയാളം",
+  btn_analyze:"തൽക്ഷണ വിധി നേടുക", btn_analyzing:"വിശകലനം ചെയ്യുന്നു...",
+  alert_empty_desc:"ദയവായി എന്താണ് സംഭവിക്കുന്നതെന്ന് വിവരിക്കുക.",
+  loading_text:"അപകടസാധ്യത വർഗ്ഗീകരണം നടക്കുന്നു…",
+  error_text:"ഈ റിപ്പോർട്ട് വിശകലനം ചെയ്യുന്നതിൽ പ്രശ്നമുണ്ടായി. ദയവായി വീണ്ടും ശ്രമിക്കുക, അല്ലെങ്കിൽ നിങ്ങൾ ഉടനടി പണം അയക്കാനുള്ള അപകടത്തിലാണെങ്കിൽ, നിർത്തി നേരിട്ട് 1930 ലേക്ക് വിളിക്കുക.",
+  verdict_high:"ഉയർന്ന അപകടസാധ്യത — തട്ടിപ്പാകാം", verdict_medium:"ഇടത്തരം അപകടസാധ്യത — ജാഗ്രത പാലിക്കുക", verdict_low:"കുറഞ്ഞ അപകടസാധ്യത", verdict_unknown:"അനിശ്ചിതം",
+  confidence_label:"ആത്മവിശ്വാസം",
+  flags_title_prefix:"കണ്ടെത്തിയ മുന്നറിയിപ്പ് സൂചനകൾ —",
+  action_file:"cybercrime.gov.in ൽ റിപ്പോർട്ട് ചെയ്യുക →", action_call:"1930 ഹെൽപ്‌ലൈനിലേക്ക് വിളിക്കുക",
+  note_suffix:"ഈ റിപ്പോർട്ട് (അജ്ഞാതമായി) കമാൻഡ് സെന്ററിൽ കാണിക്കുന്ന ലൈവ് ഇന്റലിജൻസ് ഫീഡിലേക്ക് ചേർത്തിട്ടുണ്ട്.",
+  ticker_label:"ലൈവ് ഫീഡ്", ticker_empty:"ഇതുവരെ സജീവമായ മൾട്ടി-റിപ്പോർട്ട് കാമ്പെയിനുകൾ ഇല്ല.",
+  stat_total:"ആകെ റിപ്പോർട്ടുകൾ", stat_high:"ഉയർന്ന അപകടസാധ്യതയുള്ള റിപ്പോർട്ടുകൾ", stat_clusters:"സജീവ കാമ്പെയിനുകൾ കണ്ടെത്തി", stat_numbers:"വ്യത്യസ്ത നമ്പറുകൾ ഫ്ലാഗ് ചെയ്തു",
+  section_clusters:"സജീവ കാമ്പെയിൻ ക്ലസ്റ്ററുകൾ", btn_refresh:"↻ പുതുക്കുക",
+  col_id:"കാമ്പെയിൻ ഐഡി", col_type:"തട്ടിപ്പിന്റെ തരം", col_severity:"തീവ്രത", col_reports:"റിപ്പോർട്ടുകൾ", col_export:"കയറ്റുമതി",
+  empty_clusters:"ഇതുവരെ സജീവ കാമ്പെയിനുകളൊന്നും കണ്ടെത്തിയിട്ടില്ല.",
+  section_feed:"സമീപകാല റിപ്പോർട്ടുകൾ", empty_feed:"ഈ സെഷനിൽ ഇതുവരെ റിപ്പോർട്ടുകളൊന്നും സമർപ്പിച്ചിട്ടില്ല.",
+  multiple_numbers:"ഒന്നിലധികം നമ്പറുകൾ", unknown_number:"അജ്ഞാതം", unclassified:"തരംതിരിക്കാത്തത്", packet_btn:"⬇ പാക്കറ്റ്",
+  report_count_suffix:"റിപ്പോർട്ട്", reports_count_suffix:"റിപ്പോർട്ടുകൾ"
+},
+pa: {
+  eyebrow:"ਡਿਜੀਟਲ ਪਬਲਿਕ ਸੇਫਟੀ ਇੰਟੈਲੀਜੈਂਸ — ਪ੍ਰੋਟੋਟਾਈਪ", lang_label:"ਭਾਸ਼ਾ",
+  nav_report:"ਸੰਪਰਕ ਦੀ ਰਿਪੋਰਟ ਕਰੋ", nav_command:"ਕਮਾਂਡ ਸੈਂਟਰ",
+  report_title:"ਕੀ ਇਹ ਧੋਖਾਧੜੀ ਹੈ?",
+  report_sub:"ਹੁਣੇ ਕੀ ਹੋ ਰਿਹਾ ਹੈ ਸਾਨੂੰ ਦੱਸੋ — ਕਾਲ ਜਾਂ ਸੁਨੇਹੇ ਦੌਰਾਨ, ਬਾਅਦ ਵਿੱਚ ਨਹੀਂ। ਸਿਰਫ਼ 20 ਸਕਿੰਟ ਲੱਗਣਗੇ।",
+  label_number:"ਕਾਲ ਕਰਨ ਵਾਲੇ ਦਾ ਨੰਬਰ (ਜੇ ਪਤਾ ਹੋਵੇ)", placeholder_number:"ਜਿਵੇਂ +91 98XXX XXXXX ਜਾਂ ਅਣਜਾਣ",
+  label_claim:"ਉਹ ਕੀ ਦਾਅਵਾ ਕਰ ਰਹੇ ਹਨ?",
+  chip_cbi:"ਸੀਬੀਆਈ / ਪੁਲਿਸ / ਈਡੀ", chip_customs:"ਕਸਟਮਜ਼ / ਪਾਰਸਲ", chip_bank:"ਬੈਂਕ / ਕੇਵਾਈਸੀ",
+  chip_investment:"ਨਿਵੇਸ਼ ਯੋਜਨਾ", chip_utility:"ਬਿਜਲੀ ਬਿੱਲ", chip_other:"ਕੁਝ ਹੋਰ",
+  label_desc:"ਵਰਣਨ ਕਰੋ ਕਿ ਉਨ੍ਹਾਂ ਨੇ ਬਿਲਕੁਲ ਕੀ ਕਿਹਾ / ਮੰਗਿਆ",
+  placeholder_desc:"ਜਿਵੇਂ: ਵੀਡੀਓ ਕਾਲ 'ਤੇ ਪੁਲਿਸ ਵਰਦੀ ਵਿੱਚ ਵਿਅਕਤੀ, ਕਹਿੰਦਾ ਹੈ ਕਿ ਮੇਰਾ ਆਧਾਰ ਇੱਕ ਨਸ਼ੀਲੇ ਪਦਾਰਥ ਦੇ ਮਾਮਲੇ ਨਾਲ ਜੁੜਿਆ ਹੈ।",
+  label_method:"ਸੰਪਰਕ ਦਾ ਤਰੀਕਾ",
+  method_video:"ਵੀਡੀਓ ਕਾਲ", method_phone:"ਫੋਨ ਕਾਲ", method_whatsapp:"ਵਟਸਐਪ ਸੁਨੇਹਾ", method_sms:"ਐਸਐਮਐਸ", method_email:"ਈਮੇਲ",
+  label_verdict_lang:"ਨਤੀਜਾ ਇਸ ਭਾਸ਼ਾ ਵਿੱਚ ਦਿਖਾਇਆ ਜਾਵੇਗਾ", verdict_lang_value:"ਪੰਜਾਬੀ",
+  btn_analyze:"ਤੁਰੰਤ ਨਤੀਜਾ ਪ੍ਰਾਪਤ ਕਰੋ", btn_analyzing:"ਵਿਸ਼ਲੇਸ਼ਣ ਹੋ ਰਿਹਾ ਹੈ...",
+  alert_empty_desc:"ਕਿਰਪਾ ਕਰਕੇ ਦੱਸੋ ਕੀ ਹੋ ਰਿਹਾ ਹੈ।",
+  loading_text:"ਜੋਖਮ ਵਰਗੀਕਰਨ ਚੱਲ ਰਿਹਾ ਹੈ…",
+  error_text:"ਇਸ ਰਿਪੋਰਟ ਦਾ ਵਿਸ਼ਲੇਸ਼ਣ ਕਰਨ ਵਿੱਚ ਸਮੱਸਿਆ ਆਈ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ, ਜਾਂ ਜੇ ਤੁਸੀਂ ਤੁਰੰਤ ਪੈਸੇ ਭੇਜਣ ਦੇ ਖ਼ਤਰੇ ਵਿੱਚ ਹੋ, ਤਾਂ ਰੁਕੋ ਅਤੇ ਸਿੱਧੇ 1930 'ਤੇ ਕਾਲ ਕਰੋ।",
+  verdict_high:"ਉੱਚ ਜੋਖਮ — ਸੰਭਾਵਿਤ ਧੋਖਾਧੜੀ", verdict_medium:"ਦਰਮਿਆਨਾ ਜੋਖਮ — ਸਾਵਧਾਨ ਰਹੋ", verdict_low:"ਘੱਟ ਜੋਖਮ", verdict_unknown:"ਅਨਿਸ਼ਚਿਤ",
+  confidence_label:"ਭਰੋਸਾ",
+  flags_title_prefix:"ਪਛਾਣੇ ਗਏ ਚੇਤਾਵਨੀ ਸੰਕੇਤ —",
+  action_file:"cybercrime.gov.in 'ਤੇ ਰਿਪੋਰਟ ਕਰੋ →", action_call:"1930 ਹੈਲਪਲਾਈਨ ਨੂੰ ਕਾਲ ਕਰੋ",
+  note_suffix:"ਇਹ ਰਿਪੋਰਟ (ਗੁਮਨਾਮ ਤੌਰ 'ਤੇ) ਕਮਾਂਡ ਸੈਂਟਰ ਵਿੱਚ ਦਿਖਾਏ ਗਏ ਲਾਈਵ ਇੰਟੈਲੀਜੈਂਸ ਫੀਡ ਵਿੱਚ ਸ਼ਾਮਲ ਕੀਤੀ ਗਈ ਹੈ।",
+  ticker_label:"ਲਾਈਵ ਫੀਡ", ticker_empty:"ਅਜੇ ਤੱਕ ਕੋਈ ਸਰਗਰਮ ਬਹੁ-ਰਿਪੋਰਟ ਮੁਹਿੰਮ ਨਹੀਂ ਹੈ।",
+  stat_total:"ਕੁੱਲ ਰਿਪੋਰਟਾਂ", stat_high:"ਉੱਚ-ਜੋਖਮ ਰਿਪੋਰਟਾਂ", stat_clusters:"ਸਰਗਰਮ ਮੁਹਿੰਮਾਂ ਮਿਲੀਆਂ", stat_numbers:"ਵੱਖਰੇ ਨੰਬਰ ਝੰਡੇ ਲੱਗੇ",
+  section_clusters:"ਸਰਗਰਮ ਮੁਹਿੰਮ ਸਮੂਹ", btn_refresh:"↻ ਤਾਜ਼ਾ ਕਰੋ",
+  col_id:"ਮੁਹਿੰਮ ਆਈਡੀ", col_type:"ਧੋਖਾਧੜੀ ਦੀ ਕਿਸਮ", col_severity:"ਗੰਭੀਰਤਾ", col_reports:"ਰਿਪੋਰਟਾਂ", col_export:"ਨਿਰਯਾਤ",
+  empty_clusters:"ਅਜੇ ਤੱਕ ਕੋਈ ਸਰਗਰਮ ਮੁਹਿੰਮ ਨਹੀਂ ਮਿਲੀ।",
+  section_feed:"ਹਾਲੀਆ ਰਿਪੋਰਟਾਂ", empty_feed:"ਇਸ ਸੈਸ਼ਨ ਵਿੱਚ ਅਜੇ ਤੱਕ ਕੋਈ ਰਿਪੋਰਟ ਜਮ੍ਹਾਂ ਨਹੀਂ ਕੀਤੀ ਗਈ।",
+  multiple_numbers:"ਕਈ ਨੰਬਰ", unknown_number:"ਅਣਜਾਣ", unclassified:"ਗੈਰ-ਵਰਗੀਕ੍ਰਿਤ", packet_btn:"⬇ ਪੈਕੇਟ",
+  report_count_suffix:"ਰਿਪੋਰਟ", reports_count_suffix:"ਰਿਪੋਰਟਾਂ"
+},
+or: {
+  eyebrow:"ଡିଜିଟାଲ୍ ପବ୍ଲିକ୍ ସେଫ୍ଟି ଇଣ୍ଟେଲିଜେନ୍ସ — ପ୍ରୋଟୋଟାଇପ୍", lang_label:"ଭାଷା",
+  nav_report:"ଯୋଗାଯୋଗ ରିପୋର୍ଟ କରନ୍ତୁ", nav_command:"କମାଣ୍ଡ ସେଣ୍ଟର",
+  report_title:"ଏହା କଣ ଠକେଇ?",
+  report_sub:"ବର୍ତ୍ତମାନ କଣ ଘଟୁଛି ତାହା କୁହନ୍ତୁ — କଲ୍ କିମ୍ବା ମେସେଜ୍ ସମୟରେ, ପରେ ନୁହେଁ। ମାତ୍ର 20 ସେକେଣ୍ଡ ଲାଗିବ।",
+  label_number:"କଲ୍ କରୁଥିବା ବ୍ୟକ୍ତିଙ୍କ ନମ୍ବର (ଜଣାଥିଲେ)", placeholder_number:"ଯଥା +91 98XXX XXXXX କିମ୍ବା ଅଜଣା",
+  label_claim:"ସେମାନେ କଣ ଦାବି କରୁଛନ୍ତି?",
+  chip_cbi:"ସିବିଆଇ / ପୋଲିସ୍ / ଇଡି", chip_customs:"କଷ୍ଟମ୍ସ / ପାର୍ସେଲ", chip_bank:"ବ୍ୟାଙ୍କ / କେୱାଇସି",
+  chip_investment:"ନିବେଶ ଯୋଜନା", chip_utility:"ବିଦ୍ୟୁତ୍ ବିଲ୍", chip_other:"ଅନ୍ୟ କିଛି",
+  label_desc:"ସେମାନେ ଠିକ୍ କଣ କହିଥିଲେ / ମାଗିଥିଲେ ତାହା ବର୍ଣ୍ଣନା କରନ୍ତୁ",
+  placeholder_desc:"ଯଥା: ଭିଡିଓ କଲ୍ ରେ ପୋଲିସ୍ ୟୁନିଫର୍ମରେ ଥିବା ବ୍ୟକ୍ତି, ମୋ ଆଧାର ଏକ ମାଦକ ମାମଲା ସହିତ ଜଡିତ ବୋଲି କହୁଛନ୍ତି।",
+  label_method:"ଯୋଗାଯୋଗ ପଦ୍ଧତି",
+  method_video:"ଭିଡିଓ କଲ୍", method_phone:"ଫୋନ୍ କଲ୍", method_whatsapp:"ହ୍ୱାଟସ୍ଆପ୍ ମେସେଜ୍", method_sms:"ଏସଏମଏସ୍", method_email:"ଇମେଲ୍",
+  label_verdict_lang:"ଫଳାଫଳ ଏହି ଭାଷାରେ ଦେଖାଯିବ", verdict_lang_value:"ଓଡ଼ିଆ",
+  btn_analyze:"ତତକ୍ଷଣାତ୍ ଫଳାଫଳ ପାଆନ୍ତୁ", btn_analyzing:"ବିଶ୍ଳେଷଣ ଚାଲିଛି...",
+  alert_empty_desc:"ଦୟାକରି କଣ ଘଟୁଛି ବର୍ଣ୍ଣନା କରନ୍ତୁ।",
+  loading_text:"ବିପଦ ବର୍ଗୀକରଣ ଚାଲିଛି…",
+  error_text:"ଏହି ରିପୋର୍ଟ ବିଶ୍ଳେଷଣ କରିବାରେ ସମସ୍ୟା ହେଲା। ଦୟାକରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ, କିମ୍ବା ଯଦି ଆପଣ ତୁରନ୍ତ ଟଙ୍କା ପଠାଇବାର ବିପଦରେ ଅଛନ୍ତି, ବନ୍ଦ କରନ୍ତୁ ଏବଂ ସିଧାସଳଖ 1930 କୁ କଲ୍ କରନ୍ତୁ।",
+  verdict_high:"ଉଚ୍ଚ ବିପଦ — ସମ୍ଭାବିତ ଠକେଇ", verdict_medium:"ମଧ୍ୟମ ବିପଦ — ସତର୍କ ରୁହନ୍ତୁ", verdict_low:"କମ୍ ବିପଦ", verdict_unknown:"ଅନିଶ୍ଚିତ",
+  confidence_label:"ବିଶ୍ୱାସ",
+  flags_title_prefix:"ଚିହ୍ନଟ ହୋଇଥିବା ଚେତାବନୀ ସଙ୍କେତ —",
+  action_file:"cybercrime.gov.in ରେ ରିପୋର୍ଟ କରନ୍ତୁ →", action_call:"1930 ହେଲ୍ପଲାଇନକୁ କଲ୍ କରନ୍ତୁ",
+  note_suffix:"ଏହି ରିପୋର୍ଟ (ଅଜ୍ଞାତ ଭାବରେ) କମାଣ୍ଡ ସେଣ୍ଟରରେ ଦେଖାଯାଇଥିବା ଲାଇଭ୍ ଇଣ୍ଟେଲିଜେନ୍ସ ଫିଡ୍ ରେ ଯୋଡାଯାଇଛି।",
+  ticker_label:"ଲାଇଭ୍ ଫିଡ୍", ticker_empty:"ଏପର୍ଯ୍ୟନ୍ତ କୌଣସି ସକ୍ରିୟ ବହୁ-ରିପୋର୍ଟ ଅଭିଯାନ ନାହିଁ।",
+  stat_total:"ମୋଟ ରିପୋର୍ଟ", stat_high:"ଉଚ୍ଚ-ବିପଦ ରିପୋର୍ଟ", stat_clusters:"ସକ୍ରିୟ ଅଭିଯାନ ଚିହ୍ନଟ ହେଲା", stat_numbers:"ଅଲଗା ନମ୍ବର ଚିହ୍ନିତ",
+  section_clusters:"ସକ୍ରିୟ ଅଭିଯାନ କ୍ଲଷ୍ଟର", btn_refresh:"↻ ସତେଜ କରନ୍ତୁ",
+  col_id:"ଅଭିଯାନ ଆଇଡି", col_type:"ଠକେଇ ପ୍ରକାର", col_severity:"ତୀବ୍ରତା", col_reports:"ରିପୋର୍ଟ", col_export:"ରପ୍ତାନି",
+  empty_clusters:"ଏପର୍ଯ୍ୟନ୍ତ କୌଣସି ସକ୍ରିୟ ଅଭିଯାନ ଚିହ୍ନଟ ହୋଇନାହିଁ।",
+  section_feed:"ସାମ୍ପ୍ରତିକ ରିପୋର୍ଟ", empty_feed:"ଏହି ସେସନରେ ଏପର୍ଯ୍ୟନ୍ତ କୌଣସି ରିପୋର୍ଟ ଦାଖଲ ହୋଇନାହିଁ।",
+  multiple_numbers:"ଏକାଧିକ ନମ୍ବର", unknown_number:"ଅଜଣା", unclassified:"ଅବର୍ଗୀକୃତ", packet_btn:"⬇ ପ୍ୟାକେଟ୍",
+  report_count_suffix:"ରିପୋର୍ଟ", reports_count_suffix:"ରିପୋର୍ଟ"
+},
+ur: {
+  eyebrow:"ڈیجیٹل پبلک سیفٹی انٹیلیجنس — پروٹو ٹائپ", lang_label:"زبان",
+  nav_report:"رابطے کی رپورٹ کریں", nav_command:"کمانڈ سینٹر",
+  report_title:"کیا یہ فراڈ ہے؟",
+  report_sub:"ابھی کیا ہو رہا ہے بتائیں — کال یا پیغام کے دوران، بعد میں نہیں۔ صرف 20 سیکنڈ لگیں گے۔",
+  label_number:"کال کرنے والے کا نمبر (اگر معلوم ہو)", placeholder_number:"مثلاً +91 98XXX XXXXX یا نامعلوم",
+  label_claim:"وہ کیا دعویٰ کر رہے ہیں؟",
+  chip_cbi:"سی بی آئی / پولیس / ای ڈی", chip_customs:"کسٹمز / پارسل", chip_bank:"بینک / کے وائی سی",
+  chip_investment:"سرمایہ کاری اسکیم", chip_utility:"بجلی کا بل", chip_other:"کچھ اور",
+  label_desc:"بیان کریں کہ انہوں نے بالکل کیا کہا / کیا مانگا",
+  placeholder_desc:"مثلاً: ویڈیو کال پر پولیس یونیفارم میں ایک شخص، کہتا ہے کہ میرا آدھار ایک منشیات کے کیس سے جڑا ہے۔",
+  label_method:"رابطے کا طریقہ",
+  method_video:"ویڈیو کال", method_phone:"فون کال", method_whatsapp:"واٹس ایپ پیغام", method_sms:"ایس ایم ایس", method_email:"ای میل",
+  label_verdict_lang:"نتیجہ اس زبان میں دکھایا جائے گا", verdict_lang_value:"اردو",
+  btn_analyze:"فوری نتیجہ حاصل کریں", btn_analyzing:"تجزیہ ہو رہا ہے...",
+  alert_empty_desc:"براہ کرم بتائیں کیا ہو رہا ہے۔",
+  loading_text:"خطرے کی درجہ بندی جاری ہے…",
+  error_text:"اس رپورٹ کا تجزیہ کرنے میں مسئلہ پیش آیا۔ براہ کرم دوبارہ کوشش کریں، یا اگر آپ فوری طور پر پیسے بھیجنے کے خطرے میں ہیں تو رک جائیں اور براہ راست 1930 پر کال کریں۔",
+  verdict_high:"زیادہ خطرہ — ممکنہ فراڈ", verdict_medium:"درمیانہ خطرہ — محتاط رہیں", verdict_low:"کم خطرہ", verdict_unknown:"غیر یقینی",
+  confidence_label:"اعتماد",
+  flags_title_prefix:"شناخت شدہ انتباہی نشانات —",
+  action_file:"cybercrime.gov.in پر رپورٹ کریں →", action_call:"1930 ہیلپ لائن کو کال کریں",
+  note_suffix:"یہ رپورٹ (گمنام طور پر) کمانڈ سینٹر میں دکھائے گئے لائیو انٹیلیجنس فیڈ میں شامل کر دی گئی ہے۔",
+  ticker_label:"لائیو فیڈ", ticker_empty:"ابھی تک کوئی فعال کثیر رپورٹ مہم نہیں ہے۔",
+  stat_total:"کل رپورٹس", stat_high:"زیادہ خطرے کی رپورٹس", stat_clusters:"فعال مہمات کا پتہ چلا", stat_numbers:"الگ نمبرز کی نشاندہی",
+  section_clusters:"فعال مہم کلسٹرز", btn_refresh:"↻ تازہ کریں",
+  col_id:"مہم آئی ڈی", col_type:"فراڈ کی قسم", col_severity:"شدت", col_reports:"رپورٹس", col_export:"برآمد",
+  empty_clusters:"ابھی تک کوئی فعال مہم نہیں ملی۔",
+  section_feed:"حالیہ رپورٹس", empty_feed:"اس سیشن میں ابھی تک کوئی رپورٹ جمع نہیں کرائی گئی۔",
+  multiple_numbers:"متعدد نمبرز", unknown_number:"نامعلوم", unclassified:"غیر درجہ بند", packet_btn:"⬇ پیکٹ",
+  report_count_suffix:"رپورٹ", reports_count_suffix:"رپورٹس"
+}
+};
+
+/* Extra keys added for the Currency Check tab. Merged on top of I18N at
+   lookup time via getDict(), so this can be extended independently. */
+const I18N_EXTRA = {
+en: {
+  nav_currency:"Currency Check",
+  currency_title:"Check a currency note",
+  currency_sub:"Take a clear, well-lit photo of the note (both sides help) and we'll screen it for visible signs of counterfeiting — before you accept it or hand it to someone else.",
+  dropzone_text:"Tap to upload a photo of the note",
+  remove_image:"✕ Remove",
+  label_location:"Where did you receive this note? (city / area — optional)",
+  placeholder_location:"e.g. Lucknow, Aminabad market",
+  btn_scan:"Analyse note", btn_scanning:"Analysing note...",
+  alert_no_image:"Please upload a photo of the note first.",
+  loading_currency:"Running visual screening…",
+  error_currency:"Something went wrong analysing this image. Please try a clearer photo, or use a bank counting-machine / UV lamp for a definitive check.",
+  verdict_genuine:"NO OBVIOUS ISSUES FOUND", verdict_suspicious:"VISUAL ANOMALIES FOUND", verdict_counterfeit:"HIGH SUSPICION — LIKELY FAKE", verdict_currency_unknown:"INCONCLUSIVE",
+  flags_title_currency:"What we checked",
+  disclaimer_currency:"This is a photo-based visual screening only. It cannot check the security thread's colour-shift, latent image, or UV/IR features, which require the physical note and proper equipment. Always confirm with a bank or an authorised UV/IR verification device before relying on this result.",
+  note_currency_added:"This check has been added (anonymised) to the live intelligence feed shown in the Command Center, helping map where suspect notes are circulating.",
+  stat_currency_total:"Notes screened", stat_currency_flagged:"Notes flagged suspicious",
+  section_currency_feed:"Recent Currency Checks",
+  col_time:"Time", col_denom:"Denomination", col_verdict:"Verdict", col_location:"Location",
+  empty_currency_feed:"No currency notes screened yet in this session.",
+  unclassified_denom:"Unclear", location_unknown:"Not specified"
+},
+hi: {
+  nav_currency:"करेंसी जांच",
+  currency_title:"करेंसी नोट जांचें",
+  currency_sub:"नोट की एक साफ, अच्छी रोशनी वाली फोटो लें (दोनों तरफ की मदद करती है) और हम इसे स्वीकार करने या किसी को देने से पहले नकली होने के दिखने वाले संकेतों के लिए जांचेंगे।",
+  dropzone_text:"नोट की फोटो अपलोड करने के लिए टैप करें",
+  remove_image:"✕ हटाएं",
+  label_location:"आपको यह नोट कहां मिला? (शहर / क्षेत्र — वैकल्पिक)",
+  placeholder_location:"जैसे लखनऊ, अमीनाबाद बाजार",
+  btn_scan:"नोट का विश्लेषण करें", btn_scanning:"नोट का विश्लेषण हो रहा है...",
+  alert_no_image:"कृपया पहले नोट की एक फोटो अपलोड करें।",
+  loading_currency:"दृश्य जांच चल रही है…",
+  error_currency:"इस छवि का विश्लेषण करने में समस्या हुई। कृपया एक साफ फोटो आज़माएं, या निश्चित जांच के लिए बैंक काउंटिंग मशीन / यूवी लैंप का उपयोग करें।",
+  verdict_genuine:"कोई स्पष्ट समस्या नहीं मिली", verdict_suspicious:"दृश्य असंगतियां मिलीं", verdict_counterfeit:"उच्च संदेह — संभावित नकली", verdict_currency_unknown:"अनिर्णायक",
+  flags_title_currency:"हमने क्या जांचा",
+  disclaimer_currency:"यह केवल फोटो-आधारित दृश्य जांच है। यह सुरक्षा धागे के रंग-परिवर्तन, गुप्त छवि, या यूवी/आईआर सुविधाओं की जांच नहीं कर सकती, जिनके लिए वास्तविक नोट और उचित उपकरण चाहिए। इस परिणाम पर भरोसा करने से पहले हमेशा बैंक या अधिकृत यूवी/आईआर उपकरण से पुष्टि करें।",
+  note_currency_added:"यह जांच (गुमनाम रूप से) कमांड सेंटर में दिखाए गए लाइव इंटेलिजेंस फीड में जोड़ी गई है।",
+  stat_currency_total:"जांचे गए नोट", stat_currency_flagged:"संदिग्ध चिह्नित नोट",
+  section_currency_feed:"हाल की करेंसी जांच",
+  col_time:"समय", col_denom:"मूल्यवर्ग", col_verdict:"परिणाम", col_location:"स्थान",
+  empty_currency_feed:"इस सत्र में अभी तक कोई नोट जांचा नहीं गया।",
+  unclassified_denom:"अस्पष्ट", location_unknown:"निर्दिष्ट नहीं"
+},
+ta: {
+  nav_currency:"நாணய சரிபார்ப்பு",
+  currency_title:"ஒரு நாணயக் குறிப்பை சரிபார்க்கவும்",
+  currency_sub:"நோட்டின் தெளிவான, நல்ல வெளிச்சமுள்ள புகைப்படத்தை எடுக்கவும் (இருபுறமும் உதவும்), ஏற்றுக்கொள்வதற்கு முன் போலியானதற்கான தெரியும் அறிகுறிகளை நாங்கள் சரிபார்ப்போம்.",
+  dropzone_text:"நோட்டின் புகைப்படத்தை பதிவேற்ற தட்டவும்",
+  remove_image:"✕ அகற்று",
+  label_location:"இந்த நோட்டை எங்கு பெற்றீர்கள்? (நகரம் / பகுதி — விருப்பம்)",
+  placeholder_location:"எ.கா. லக்னோ, அமீனாபாத் சந்தை",
+  btn_scan:"நோட்டை பகுப்பாய்வு செய்யவும்", btn_scanning:"பகுப்பாய்வு செய்யப்படுகிறது...",
+  alert_no_image:"முதலில் நோட்டின் புகைப்படத்தை பதிவேற்றவும்.",
+  loading_currency:"காட்சி பரிசோதனை நடைபெறுகிறது…",
+  error_currency:"இந்த படத்தை பகுப்பாய்வு செய்வதில் சிக்கல் ஏற்பட்டது. தெளிவான புகைப்படத்தை முயற்சிக்கவும், அல்லது உறுதியான சரிபார்ப்புக்கு வங்கி எண்ணும் இயந்திரம் / யூவி விளக்கைப் பயன்படுத்தவும்.",
+  verdict_genuine:"தெளிவான சிக்கல்கள் இல்லை", verdict_suspicious:"காட்சி முரண்பாடுகள் கண்டறியப்பட்டன", verdict_counterfeit:"அதிக சந்தேகம் — போலியாக இருக்கலாம்", verdict_currency_unknown:"முடிவற்றது",
+  flags_title_currency:"நாங்கள் சரிபார்த்தது",
+  disclaimer_currency:"இது புகைப்படம் அடிப்படையிலான காட்சி பரிசோதனை மட்டுமே. இது பாதுகாப்பு நூலின் நிற மாற்றம், மறைந்த படம், அல்லது யூவி/ஐஆர் அம்சங்களை சரிபார்க்க முடியாது. இதற்கு உண்மையான நோட்டும் சரியான உபகரணமும் தேவை. இந்த முடிவை நம்புவதற்கு முன் எப்போதும் வங்கி அல்லது அங்கீகரிக்கப்பட்ட யூவி/ஐஆர் சாதனத்தில் உறுதிப்படுத்தவும்.",
+  note_currency_added:"இந்த சரிபார்ப்பு (அடையாளம் இல்லாமல்) கட்டளை மையத்தில் காட்டப்படும் நேரடி நுண்ணறிவு ஊட்டத்தில் சேர்க்கப்பட்டுள்ளது.",
+  stat_currency_total:"சரிபார்க்கப்பட்ட நோட்டுகள்", stat_currency_flagged:"சந்தேகத்திற்குரியதாக குறிக்கப்பட்டவை",
+  section_currency_feed:"சமீபத்திய நாணய சரிபார்ப்புகள்",
+  col_time:"நேரம்", col_denom:"மதிப்பு", col_verdict:"முடிவு", col_location:"இடம்",
+  empty_currency_feed:"இந்த அமர்வில் இதுவரை நோட்டுகள் சரிபார்க்கப்படவில்லை.",
+  unclassified_denom:"தெளிவற்றது", location_unknown:"குறிப்பிடப்படவில்லை"
+},
+te: {
+  nav_currency:"కరెన్సీ తనిఖీ",
+  currency_title:"కరెన్సీ నోటును తనిఖీ చేయండి",
+  currency_sub:"నోటు యొక్క స్పష్టమైన, మంచి వెలుతురు ఉన్న ఫోటో తీయండి (రెండు వైపులా సహాయపడతాయి), స్వీకరించే ముందు నకిలీ సంకేతాల కోసం మేము తనిఖీ చేస్తాము.",
+  dropzone_text:"నోటు ఫోటోను అప్‌లోడ్ చేయడానికి నొక్కండి",
+  remove_image:"✕ తొలగించు",
+  label_location:"ఈ నోటు మీకు ఎక్కడ వచ్చింది? (నగరం / ప్రాంతం — ఐచ్ఛికం)",
+  placeholder_location:"ఉదా. లక్నో, అమీనాబాద్ మార్కెట్",
+  btn_scan:"నోటును విశ్లేషించండి", btn_scanning:"విశ్లేషణ జరుగుతోంది...",
+  alert_no_image:"దయచేసి ముందుగా నోటు ఫోటోను అప్‌లోడ్ చేయండి.",
+  loading_currency:"దృశ్య పరిశీలన నడుస్తోంది…",
+  error_currency:"ఈ చిత్రాన్ని విశ్లేషించడంలో సమస్య వచ్చింది. స్పష్టమైన ఫోటోను ప్రయత్నించండి, లేదా ఖచ్చితమైన తనిఖీ కోసం బ్యాంక్ కౌంటింగ్ మెషీన్ / యూవీ ల్యాంప్ ఉపయోగించండి.",
+  verdict_genuine:"స్పష్టమైన సమస్యలు కనుగొనబడలేదు", verdict_suspicious:"దృశ్యపరమైన అసమానతలు కనుగొనబడ్డాయి", verdict_counterfeit:"అధిక అనుమానం — నకిలీ కావచ్చు", verdict_currency_unknown:"అనిశ్చితం",
+  flags_title_currency:"మేము తనిఖీ చేసినవి",
+  disclaimer_currency:"ఇది ఫోటో-ఆధారిత దృశ్య పరిశీలన మాత్రమే. ఇది భద్రతా దారం రంగు-మార్పు, గుప్త చిత్రం, లేదా యూవీ/ఐఆర్ లక్షణాలను తనిఖీ చేయలేదు, వీటికి భౌతిక నోటు మరియు సరైన పరికరాలు అవసరం. ఈ ఫలితంపై ఆధారపడే ముందు ఎల్లప్పుడూ బ్యాంక్ లేదా అధీకృత యూవీ/ఐఆర్ పరికరంతో నిర్ధారించుకోండి.",
+  note_currency_added:"ఈ తనిఖీ (అనామకంగా) కమాండ్ సెంటర్‌లో చూపబడే లైవ్ ఇంటెలిజెన్స్ ఫీడ్‌కు జోడించబడింది.",
+  stat_currency_total:"తనిఖీ చేసిన నోట్లు", stat_currency_flagged:"సందేహాస్పదంగా గుర్తించినవి",
+  section_currency_feed:"ఇటీవలి కరెన్సీ తనిఖీలు",
+  col_time:"సమయం", col_denom:"విలువ", col_verdict:"ఫలితం", col_location:"ప్రదేశం",
+  empty_currency_feed:"ఈ సెషన్‌లో ఇంకా నోట్లు తనిఖీ చేయబడలేదు.",
+  unclassified_denom:"అస్పష్టం", location_unknown:"పేర్కొనలేదు"
+},
+bn: {
+  nav_currency:"মুদ্রা যাচাই",
+  currency_title:"একটি মুদ্রার নোট যাচাই করুন",
+  currency_sub:"নোটের একটি পরিষ্কার, ভালো আলোর ছবি তুলুন (উভয় দিক সাহায্য করে), গ্রহণ করার আগে জাল হওয়ার দৃশ্যমান লক্ষণের জন্য আমরা এটি যাচাই করব।",
+  dropzone_text:"নোটের ছবি আপলোড করতে ট্যাপ করুন",
+  remove_image:"✕ সরান",
+  label_location:"আপনি এই নোটটি কোথায় পেয়েছেন? (শহর / এলাকা — ঐচ্ছিক)",
+  placeholder_location:"যেমন লখনউ, আমিনাবাদ বাজার",
+  btn_scan:"নোট বিশ্লেষণ করুন", btn_scanning:"বিশ্লেষণ চলছে...",
+  alert_no_image:"দয়া করে প্রথমে নোটের একটি ছবি আপলোড করুন।",
+  loading_currency:"ভিজ্যুয়াল স্ক্রিনিং চলছে…",
+  error_currency:"এই ছবিটি বিশ্লেষণ করতে সমস্যা হয়েছে। একটি পরিষ্কার ছবি চেষ্টা করুন, অথবা নিশ্চিত পরীক্ষার জন্য ব্যাংক গণনা মেশিন / ইউভি ল্যাম্প ব্যবহার করুন।",
+  verdict_genuine:"কোনো সুস্পষ্ট সমস্যা পাওয়া যায়নি", verdict_suspicious:"ভিজ্যুয়াল অসঙ্গতি পাওয়া গেছে", verdict_counterfeit:"উচ্চ সন্দেহ — জাল হতে পারে", verdict_currency_unknown:"অনির্ণায়ক",
+  flags_title_currency:"আমরা যা যাচাই করেছি",
+  disclaimer_currency:"এটি শুধুমাত্র ছবি-ভিত্তিক ভিজ্যুয়াল স্ক্রিনিং। এটি নিরাপত্তা সুতার রঙ-পরিবর্তন, সুপ্ত চিত্র, বা ইউভি/আইআর বৈশিষ্ট্য পরীক্ষা করতে পারে না। এই ফলাফলের উপর নির্ভর করার আগে সর্বদা ব্যাংক বা অনুমোদিত ইউভি/আইআর ডিভাইস দিয়ে নিশ্চিত করুন।",
+  note_currency_added:"এই যাচাইকরণ (বেনামে) কমান্ড সেন্টারে দেখানো লাইভ ইন্টেলিজেন্স ফিডে যোগ করা হয়েছে।",
+  stat_currency_total:"যাচাইকৃত নোট", stat_currency_flagged:"সন্দেহজনক চিহ্নিত নোট",
+  section_currency_feed:"সাম্প্রতিক মুদ্রা যাচাই",
+  col_time:"সময়", col_denom:"মূল্যমান", col_verdict:"ফলাফল", col_location:"অবস্থান",
+  empty_currency_feed:"এই সেশনে এখনও কোনো নোট যাচাই করা হয়নি।",
+  unclassified_denom:"অস্পষ্ট", location_unknown:"উল্লেখ করা হয়নি"
+},
+mr: {
+  nav_currency:"चलन तपासणी",
+  currency_title:"चलनी नोट तपासा",
+  currency_sub:"नोटेचा स्पष्ट, चांगल्या प्रकाशातील फोटो घ्या (दोन्ही बाजू मदत करतात), स्वीकारण्यापूर्वी बनावट असल्याच्या दिसणाऱ्या चिन्हांसाठी आम्ही तपासू.",
+  dropzone_text:"नोटेचा फोटो अपलोड करण्यासाठी टॅप करा",
+  remove_image:"✕ काढा",
+  label_location:"तुम्हाला ही नोट कुठे मिळाली? (शहर / भाग — पर्यायी)",
+  placeholder_location:"उदा. लखनौ, अमीनाबाद बाजार",
+  btn_scan:"नोटेचे विश्लेषण करा", btn_scanning:"विश्लेषण चालू आहे...",
+  alert_no_image:"कृपया प्रथम नोटेचा फोटो अपलोड करा.",
+  loading_currency:"दृश्य तपासणी चालू आहे…",
+  error_currency:"या प्रतिमेचे विश्लेषण करताना समस्या आली. स्पष्ट फोटो वापरून पहा, किंवा निश्चित तपासणीसाठी बँक मोजणी मशीन / यूव्ही दिवा वापरा.",
+  verdict_genuine:"कोणतीही स्पष्ट समस्या आढळली नाही", verdict_suspicious:"दृश्य विसंगती आढळल्या", verdict_counterfeit:"उच्च संशय — बनावट असू शकते", verdict_currency_unknown:"अनिर्णित",
+  flags_title_currency:"आम्ही काय तपासले",
+  disclaimer_currency:"ही फक्त फोटो-आधारित दृश्य तपासणी आहे. ती सुरक्षा धाग्याचा रंग-बदल, गुप्त प्रतिमा, किंवा यूव्ही/आयआर वैशिष्ट्ये तपासू शकत नाही. या निकालावर अवलंबून राहण्यापूर्वी नेहमी बँक किंवा अधिकृत यूव्ही/आयआर उपकरणाने खात्री करा.",
+  note_currency_added:"ही तपासणी (निनावीपणे) कमांड सेंटरमध्ये दाखवलेल्या लाइव्ह इंटेलिजन्स फीडमध्ये जोडली गेली आहे.",
+  stat_currency_total:"तपासलेल्या नोटा", stat_currency_flagged:"संशयास्पद चिन्हांकित नोटा",
+  section_currency_feed:"अलीकडील चलन तपासणी",
+  col_time:"वेळ", col_denom:"मूल्य", col_verdict:"निकाल", col_location:"ठिकाण",
+  empty_currency_feed:"या सत्रात अद्याप कोणतीही नोट तपासली नाही.",
+  unclassified_denom:"अस्पष्ट", location_unknown:"नमूद नाही"
+},
+kn: {
+  nav_currency:"ಕರೆನ್ಸಿ ಪರಿಶೀಲನೆ",
+  currency_title:"ಕರೆನ್ಸಿ ನೋಟನ್ನು ಪರಿಶೀಲಿಸಿ",
+  currency_sub:"ನೋಟಿನ ಸ್ಪಷ್ಟ, ಉತ್ತಮ ಬೆಳಕಿನ ಫೋಟೋ ತೆಗೆಯಿರಿ (ಎರಡೂ ಬದಿಗಳು ಸಹಾಯ ಮಾಡುತ್ತವೆ), ಸ್ವೀಕರಿಸುವ ಮೊದಲು ನಕಲಿಯ ಗೋಚರ ಚಿಹ್ನೆಗಳಿಗಾಗಿ ನಾವು ಪರಿಶೀಲಿಸುತ್ತೇವೆ.",
+  dropzone_text:"ನೋಟಿನ ಫೋಟೋ ಅಪ್‌ಲೋಡ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ",
+  remove_image:"✕ ತೆಗೆದುಹಾಕಿ",
+  label_location:"ಈ ನೋಟು ನಿಮಗೆ ಎಲ್ಲಿ ಸಿಕ್ಕಿತು? (ನಗರ / ಪ್ರದೇಶ — ಐಚ್ಛಿಕ)",
+  placeholder_location:"ಉದಾ. ಲಕ್ನೋ, ಅಮೀನಾಬಾದ್ ಮಾರುಕಟ್ಟೆ",
+  btn_scan:"ನೋಟನ್ನು ವಿಶ್ಲೇಷಿಸಿ", btn_scanning:"ವಿಶ್ಲೇಷಣೆ ನಡೆಯುತ್ತಿದೆ...",
+  alert_no_image:"ದಯವಿಟ್ಟು ಮೊದಲು ನೋಟಿನ ಫೋಟೋ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ.",
+  loading_currency:"ದೃಶ್ಯ ಪರಿಶೀಲನೆ ನಡೆಯುತ್ತಿದೆ…",
+  error_currency:"ಈ ಚಿತ್ರವನ್ನು ವಿಶ್ಲೇಷಿಸುವಲ್ಲಿ ಸಮಸ್ಯೆಯಾಯಿತು. ಸ್ಪಷ್ಟವಾದ ಫೋಟೋ ಪ್ರಯತ್ನಿಸಿ, ಅಥವಾ ಖಚಿತ ಪರಿಶೀಲನೆಗಾಗಿ ಬ್ಯಾಂಕ್ ಕೌಂಟಿಂಗ್ ಯಂತ್ರ / ಯುವಿ ಲ್ಯಾಂಪ್ ಬಳಸಿ.",
+  verdict_genuine:"ಯಾವುದೇ ಸ್ಪಷ್ಟ ಸಮಸ್ಯೆಗಳು ಕಂಡುಬಂದಿಲ್ಲ", verdict_suspicious:"ದೃಶ್ಯ ವ್ಯತ್ಯಾಸಗಳು ಕಂಡುಬಂದಿವೆ", verdict_counterfeit:"ಹೆಚ್ಚಿನ ಅನುಮಾನ — ನಕಲಿ ಆಗಿರಬಹುದು", verdict_currency_unknown:"ಅನಿರ್ದಿಷ್ಟ",
+  flags_title_currency:"ನಾವು ಪರಿಶೀಲಿಸಿದ್ದು",
+  disclaimer_currency:"ಇದು ಫೋಟೋ-ಆಧಾರಿತ ದೃಶ್ಯ ಪರಿಶೀಲನೆ ಮಾತ್ರ. ಇದು ಭದ್ರತಾ ದಾರದ ಬಣ್ಣ-ಬದಲಾವಣೆ, ಗುಪ್ತ ಚಿತ್ರ, ಅಥವಾ ಯುವಿ/ಐಆರ್ ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ಪರಿಶೀಲಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ಈ ಫಲಿತಾಂಶವನ್ನು ಅವಲಂಬಿಸುವ ಮೊದಲು ಯಾವಾಗಲೂ ಬ್ಯಾಂಕ್ ಅಥವಾ ಅಧಿಕೃತ ಯುವಿ/ಐಆರ್ ಸಾಧನದೊಂದಿಗೆ ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ.",
+  note_currency_added:"ಈ ಪರಿಶೀಲನೆಯನ್ನು (ಅನಾಮಧೇಯವಾಗಿ) ಕಮಾಂಡ್ ಸೆಂಟರ್‌ನಲ್ಲಿ ತೋರಿಸಲಾದ ಲೈವ್ ಇಂಟೆಲಿಜೆನ್ಸ್ ಫೀಡ್‌ಗೆ ಸೇರಿಸಲಾಗಿದೆ.",
+  stat_currency_total:"ಪರಿಶೀಲಿಸಿದ ನೋಟುಗಳು", stat_currency_flagged:"ಸಂಶಯಾಸ್ಪದವೆಂದು ಗುರುತಿಸಲಾಗಿದೆ",
+  section_currency_feed:"ಇತ್ತೀಚಿನ ಕರೆನ್ಸಿ ಪರಿಶೀಲನೆಗಳು",
+  col_time:"ಸಮಯ", col_denom:"ಮುಖಬೆಲೆ", col_verdict:"ಫಲಿತಾಂಶ", col_location:"ಸ್ಥಳ",
+  empty_currency_feed:"ಈ ಅಧಿವೇಶನದಲ್ಲಿ ಇನ್ನೂ ಯಾವುದೇ ನೋಟುಗಳನ್ನು ಪರಿಶೀಲಿಸಲಾಗಿಲ್ಲ.",
+  unclassified_denom:"ಅಸ್ಪಷ್ಟ", location_unknown:"ನಮೂದಿಸಿಲ್ಲ"
+},
+gu: {
+  nav_currency:"ચલણ ચકાસણી",
+  currency_title:"ચલણી નોટ ચકાસો",
+  currency_sub:"નોટનો સ્પષ્ટ, સારી રોશનીવાળો ફોટો લો (બંને બાજુ મદદરૂપ છે), સ્વીકારતા પહેલા નકલી હોવાના દેખાતા સંકેતો માટે અમે તપાસીશું.",
+  dropzone_text:"નોટનો ફોટો અપલોડ કરવા ટેપ કરો",
+  remove_image:"✕ દૂર કરો",
+  label_location:"તમને આ નોટ ક્યાં મળી? (શહેર / વિસ્તાર — વૈકલ્પિક)",
+  placeholder_location:"દા.ત. લખનૌ, અમીનાબાદ બજાર",
+  btn_scan:"નોટનું વિશ્લેષણ કરો", btn_scanning:"વિશ્લેષણ ચાલી રહ્યું છે...",
+  alert_no_image:"કૃપા કરી પહેલા નોટનો ફોટો અપલોડ કરો.",
+  loading_currency:"દ્રશ્ય તપાસ ચાલી રહી છે…",
+  error_currency:"આ છબીનું વિશ્લેષણ કરવામાં સમસ્યા આવી. સ્પષ્ટ ફોટો અજમાવો, અથવા ચોક્કસ તપાસ માટે બેંક ગણતરી મશીન / યુવી લેમ્પનો ઉપયોગ કરો.",
+  verdict_genuine:"કોઈ સ્પષ્ટ સમસ્યા મળી નથી", verdict_suspicious:"દ્રશ્ય વિસંગતતાઓ મળી", verdict_counterfeit:"ઉચ્ચ શંકા — નકલી હોઈ શકે", verdict_currency_unknown:"અનિર્ણિત",
+  flags_title_currency:"અમે શું તપાસ્યું",
+  disclaimer_currency:"આ ફક્ત ફોટો-આધારિત દ્રશ્ય તપાસ છે. તે સુરક્ષા દોરાના રંગ-પરિવર્તન, ગુપ્ત છબી, અથવા યુવી/આઈઆર સુવિધાઓ તપાસી શકતું નથી. આ પરિણામ પર આધાર રાખતા પહેલા હંમેશા બેંક અથવા અધિકૃત યુવી/આઈઆર ઉપકરણથી ખાતરી કરો.",
+  note_currency_added:"આ તપાસ (અનામી રીતે) કમાન્ડ સેન્ટરમાં બતાવેલા લાઇવ ઇન્ટેલિજન્સ ફીડમાં ઉમેરવામાં આવી છે.",
+  stat_currency_total:"તપાસેલી નોટો", stat_currency_flagged:"શંકાસ્પદ ચિહ્નિત નોટો",
+  section_currency_feed:"તાજેતરની ચલણ ચકાસણી",
+  col_time:"સમય", col_denom:"મૂલ્ય", col_verdict:"પરિણામ", col_location:"સ્થાન",
+  empty_currency_feed:"આ સત્રમાં હજુ સુધી કોઈ નોટ તપાસવામાં આવી નથી.",
+  unclassified_denom:"અસ્પષ્ટ", location_unknown:"ઉલ્લેખિત નથી"
+},
+ml: {
+  nav_currency:"കറൻസി പരിശോധന",
+  currency_title:"ഒരു കറൻസി നോട്ട് പരിശോധിക്കുക",
+  currency_sub:"നോട്ടിന്റെ വ്യക്തമായ, നല്ല വെളിച്ചമുള്ള ഫോട്ടോ എടുക്കുക (രണ്ട് വശങ്ങളും സഹായിക്കും), സ്വീകരിക്കുന്നതിന് മുമ്പ് വ്യാജമാണെന്നതിന്റെ ദൃശ്യമായ അടയാളങ്ങൾക്കായി ഞങ്ങൾ പരിശോധിക്കും.",
+  dropzone_text:"നോട്ടിന്റെ ഫോട്ടോ അപ്‌ലോഡ് ചെയ്യാൻ ടാപ്പ് ചെയ്യുക",
+  remove_image:"✕ നീക്കം ചെയ്യുക",
+  label_location:"ഈ നോട്ട് നിങ്ങൾക്ക് എവിടെ നിന്ന് ലഭിച്ചു? (നഗരം / പ്രദേശം — ഓപ്ഷണൽ)",
+  placeholder_location:"ഉദാ. ലഖ്‌നൗ, അമീനാബാദ് മാർക്കറ്റ്",
+  btn_scan:"നോട്ട് വിശകലനം ചെയ്യുക", btn_scanning:"വിശകലനം ചെയ്യുന്നു...",
+  alert_no_image:"ദയവായി ആദ്യം നോട്ടിന്റെ ഫോട്ടോ അപ്‌ലോഡ് ചെയ്യുക.",
+  loading_currency:"ദൃശ്യ പരിശോധന നടക്കുന്നു…",
+  error_currency:"ഈ ചിത്രം വിശകലനം ചെയ്യുന്നതിൽ പ്രശ്നമുണ്ടായി. വ്യക്തമായ ഫോട്ടോ ശ്രമിക്കുക, അല്ലെങ്കിൽ ഉറപ്പായ പരിശോധനയ്ക്ക് ബാങ്ക് കൗണ്ടിംഗ് മെഷീൻ / യുവി ലാമ്പ് ഉപയോഗിക്കുക.",
+  verdict_genuine:"വ്യക്തമായ പ്രശ്നങ്ങളൊന്നും കണ്ടെത്തിയില്ല", verdict_suspicious:"ദൃശ്യ പൊരുത്തക്കേടുകൾ കണ്ടെത്തി", verdict_counterfeit:"ഉയർന്ന സംശയം — വ്യാജമാകാം", verdict_currency_unknown:"അനിശ്ചിതം",
+  flags_title_currency:"ഞങ്ങൾ പരിശോധിച്ചത്",
+  disclaimer_currency:"ഇത് ഫോട്ടോ അടിസ്ഥാനമാക്കിയുള്ള ദൃശ്യ പരിശോധന മാത്രമാണ്. ഇതിന് യഥാർത്ഥ നോട്ടും ശരിയായ ഉപകരണങ്ങളും ആവശ്യമാണ്. ഈ ഫലത്തെ ആശ്രയിക്കുന്നതിന് മുമ്പ് എല്ലായ്പ്പോഴും ബാങ്ക് അല്ലെങ്കിൽ അംഗീകൃത യുവി/ഐആർ ഉപകരണം ഉപയോഗിച്ച് സ്ഥിരീകരിക്കുക.",
+  note_currency_added:"ഈ പരിശോധന (അജ്ഞാതമായി) കമാൻഡ് സെന്ററിൽ കാണിക്കുന്ന ലൈവ് ഇന്റലിജൻസ് ഫീഡിലേക്ക് ചേർത്തിട്ടുണ്ട്.",
+  stat_currency_total:"പരിശോധിച്ച നോട്ടുകൾ", stat_currency_flagged:"സംശയാസ്പദമെന്ന് അടയാളപ്പെടുത്തി",
+  section_currency_feed:"സമീപകാല കറൻസി പരിശോധനകൾ",
+  col_time:"സമയം", col_denom:"മൂല്യം", col_verdict:"ഫലം", col_location:"സ്ഥലം",
+  empty_currency_feed:"ഈ സെഷനിൽ ഇതുവരെ നോട്ടുകളൊന്നും പരിശോധിച്ചിട്ടില്ല.",
+  unclassified_denom:"അവ്യക്തം", location_unknown:"വ്യക്തമാക്കിയിട്ടില്ല"
+},
+pa: {
+  nav_currency:"ਕਰੰਸੀ ਜਾਂਚ",
+  currency_title:"ਕਰੰਸੀ ਨੋਟ ਦੀ ਜਾਂਚ ਕਰੋ",
+  currency_sub:"ਨੋਟ ਦੀ ਇੱਕ ਸਾਫ਼, ਚੰਗੀ ਰੋਸ਼ਨੀ ਵਾਲੀ ਫੋਟੋ ਲਓ, ਸਵੀਕਾਰ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਅਸੀਂ ਨਕਲੀ ਹੋਣ ਦੇ ਦਿਖਾਈ ਦੇਣ ਵਾਲੇ ਸੰਕੇਤਾਂ ਲਈ ਜਾਂਚ ਕਰਾਂਗੇ।",
+  dropzone_text:"ਨੋਟ ਦੀ ਫੋਟੋ ਅੱਪਲੋਡ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ",
+  remove_image:"✕ ਹਟਾਓ",
+  label_location:"ਤੁਹਾਨੂੰ ਇਹ ਨੋਟ ਕਿੱਥੋਂ ਮਿਲਿਆ? (ਸ਼ਹਿਰ / ਖੇਤਰ — ਵਿਕਲਪਿਕ)",
+  placeholder_location:"ਜਿਵੇਂ ਲਖਨਊ, ਅਮੀਨਾਬਾਦ ਬਾਜ਼ਾਰ",
+  btn_scan:"ਨੋਟ ਦਾ ਵਿਸ਼ਲੇਸ਼ਣ ਕਰੋ", btn_scanning:"ਵਿਸ਼ਲੇਸ਼ਣ ਹੋ ਰਿਹਾ ਹੈ...",
+  alert_no_image:"ਕਿਰਪਾ ਕਰਕੇ ਪਹਿਲਾਂ ਨੋਟ ਦੀ ਫੋਟੋ ਅੱਪਲੋਡ ਕਰੋ।",
+  loading_currency:"ਦ੍ਰਿਸ਼ਟੀ ਜਾਂਚ ਚੱਲ ਰਹੀ ਹੈ…",
+  error_currency:"ਇਸ ਤਸਵੀਰ ਦਾ ਵਿਸ਼ਲੇਸ਼ਣ ਕਰਨ ਵਿੱਚ ਸਮੱਸਿਆ ਆਈ। ਸਾਫ਼ ਫੋਟੋ ਅਜ਼ਮਾਓ, ਜਾਂ ਪੱਕੀ ਜਾਂਚ ਲਈ ਬੈਂਕ ਕਾਊਂਟਿੰਗ ਮਸ਼ੀਨ / ਯੂਵੀ ਲੈਂਪ ਵਰਤੋ।",
+  verdict_genuine:"ਕੋਈ ਸਪੱਸ਼ਟ ਸਮੱਸਿਆ ਨਹੀਂ ਮਿਲੀ", verdict_suspicious:"ਦ੍ਰਿਸ਼ਟੀ ਅਸੰਗਤੀਆਂ ਮਿਲੀਆਂ", verdict_counterfeit:"ਉੱਚ ਸ਼ੱਕ — ਨਕਲੀ ਹੋ ਸਕਦਾ ਹੈ", verdict_currency_unknown:"ਅਨਿਸ਼ਚਿਤ",
+  flags_title_currency:"ਅਸੀਂ ਕੀ ਜਾਂਚਿਆ",
+  disclaimer_currency:"ਇਹ ਸਿਰਫ਼ ਫੋਟੋ-ਆਧਾਰਿਤ ਦ੍ਰਿਸ਼ਟੀ ਜਾਂਚ ਹੈ। ਇਸ ਨਤੀਜੇ 'ਤੇ ਭਰੋਸਾ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਹਮੇਸ਼ਾ ਬੈਂਕ ਜਾਂ ਅਧਿਕਾਰਤ ਯੂਵੀ/ਆਈਆਰ ਯੰਤਰ ਨਾਲ ਪੁਸ਼ਟੀ ਕਰੋ।",
+  note_currency_added:"ਇਹ ਜਾਂਚ (ਗੁਮਨਾਮ ਤੌਰ 'ਤੇ) ਕਮਾਂਡ ਸੈਂਟਰ ਵਿੱਚ ਦਿਖਾਏ ਗਏ ਲਾਈਵ ਇੰਟੈਲੀਜੈਂਸ ਫੀਡ ਵਿੱਚ ਸ਼ਾਮਲ ਕੀਤੀ ਗਈ ਹੈ।",
+  stat_currency_total:"ਜਾਂਚੇ ਗਏ ਨੋਟ", stat_currency_flagged:"ਸ਼ੱਕੀ ਚਿੰਨ੍ਹਿਤ ਨੋਟ",
+  section_currency_feed:"ਹਾਲੀਆ ਕਰੰਸੀ ਜਾਂਚਾਂ",
+  col_time:"ਸਮਾਂ", col_denom:"ਮੁੱਲ", col_verdict:"ਨਤੀਜਾ", col_location:"ਸਥਾਨ",
+  empty_currency_feed:"ਇਸ ਸੈਸ਼ਨ ਵਿੱਚ ਅਜੇ ਤੱਕ ਕੋਈ ਨੋਟ ਨਹੀਂ ਜਾਂਚਿਆ ਗਿਆ।",
+  unclassified_denom:"ਅਸਪਸ਼ਟ", location_unknown:"ਦੱਸਿਆ ਨਹੀਂ ਗਿਆ"
+},
+or: {
+  nav_currency:"ମୁଦ୍ରା ଯାଞ୍ଚ",
+  currency_title:"ଏକ ମୁଦ୍ରା ନୋଟ୍ ଯାଞ୍ଚ କରନ୍ତୁ",
+  currency_sub:"ନୋଟ୍ର ଏକ ସ୍ପଷ୍ଟ, ଭଲ ଆଲୋକରେ ଫଟୋ ନିଅନ୍ତୁ, ଗ୍ରହଣ କରିବା ପୂର୍ବରୁ ନକଲି ହେବାର ଦୃଶ୍ୟମାନ ସଙ୍କେତ ପାଇଁ ଆମେ ଯାଞ୍ଚ କରିବୁ।",
+  dropzone_text:"ନୋଟ୍ର ଫଟୋ ଅପଲୋଡ୍ କରିବାକୁ ଟାପ୍ କରନ୍ତୁ",
+  remove_image:"✕ ହଟାନ୍ତୁ",
+  label_location:"ଆପଣ ଏହି ନୋଟ୍ କେଉଁଠାରୁ ପାଇଲେ? (ସହର / ଅଞ୍ଚଳ — ବୈକଳ୍ପିକ)",
+  placeholder_location:"ଯଥା ଲକ୍ଷ୍ନୌ, ଅମିନାବାଦ ବଜାର",
+  btn_scan:"ନୋଟ୍ ବିଶ୍ଳେଷଣ କରନ୍ତୁ", btn_scanning:"ବିଶ୍ଳେଷଣ ଚାଲିଛି...",
+  alert_no_image:"ଦୟାକରି ପ୍ରଥମେ ନୋଟ୍ର ଏକ ଫଟୋ ଅପଲୋଡ୍ କରନ୍ତୁ।",
+  loading_currency:"ଦୃଶ୍ୟ ଯାଞ୍ଚ ଚାଲିଛି…",
+  error_currency:"ଏହି ଛବିକୁ ବିଶ୍ଳେଷଣ କରିବାରେ ସମସ୍ୟା ହେଲା। ଏକ ସ୍ପଷ୍ଟ ଫଟୋ ଚେଷ୍ଟା କରନ୍ତୁ, କିମ୍ବା ନିଶ୍ଚିତ ଯାଞ୍ଚ ପାଇଁ ବ୍ୟାଙ୍କ ଗଣନା ମେସିନ୍ / ୟୁଭି ଲ୍ୟାମ୍ପ ବ୍ୟବହାର କରନ୍ତୁ।",
+  verdict_genuine:"କୌଣସି ସ୍ପଷ୍ଟ ସମସ୍ୟା ମିଳିଲା ନାହିଁ", verdict_suspicious:"ଦୃଶ୍ୟ ଅସଙ୍ଗତି ମିଳିଲା", verdict_counterfeit:"ଉଚ୍ଚ ସନ୍ଦେହ — ନକଲି ହୋଇପାରେ", verdict_currency_unknown:"ଅନିଷ୍ପତ୍ତିକ",
+  flags_title_currency:"ଆମେ କଣ ଯାଞ୍ଚ କଲୁ",
+  disclaimer_currency:"ଏହା କେବଳ ଫଟୋ-ଆଧାରିତ ଦୃଶ୍ୟ ଯାଞ୍ଚ। ଏହି ଫଳାଫଳ ଉପରେ ନିର୍ଭର କରିବା ପୂର୍ବରୁ ସର୍ବଦା ବ୍ୟାଙ୍କ କିମ୍ବା ଅଧିକୃତ ୟୁଭି/ଆଇଆର ଉପକରଣରେ ନିଶ୍ଚିତ କରନ୍ତୁ।",
+  note_currency_added:"ଏହି ଯାଞ୍ଚ (ଅଜ୍ଞାତ ଭାବରେ) କମାଣ୍ଡ ସେଣ୍ଟରରେ ଦେଖାଯାଇଥିବା ଲାଇଭ୍ ଇଣ୍ଟେଲିଜେନ୍ସ ଫିଡ୍ ରେ ଯୋଡାଯାଇଛି।",
+  stat_currency_total:"ଯାଞ୍ଚ ହୋଇଥିବା ନୋଟ୍", stat_currency_flagged:"ସନ୍ଦେହଜନକ ଭାବେ ଚିହ୍ନିତ",
+  section_currency_feed:"ସାମ୍ପ୍ରତିକ ମୁଦ୍ରା ଯାଞ୍ଚ",
+  col_time:"ସମୟ", col_denom:"ମୂଲ୍ୟ", col_verdict:"ଫଳାଫଳ", col_location:"ସ୍ଥାନ",
+  empty_currency_feed:"ଏହି ସେସନରେ ଏପର୍ଯ୍ୟନ୍ତ କୌଣସି ନୋଟ୍ ଯାଞ୍ଚ ହୋଇନାହିଁ।",
+  unclassified_denom:"ଅସ୍ପଷ୍ଟ", location_unknown:"ଉଲ୍ଲେଖ ହୋଇନାହିଁ"
+},
+ur: {
+  nav_currency:"کرنسی چیک",
+  currency_title:"کرنسی نوٹ چیک کریں",
+  currency_sub:"نوٹ کی صاف، اچھی روشنی والی تصویر لیں، قبول کرنے سے پہلے ہم جعلی ہونے کی نظر آنے والی نشانیوں کے لیے جانچیں گے۔",
+  dropzone_text:"نوٹ کی تصویر اپ لوڈ کرنے کے لیے تھپتھپائیں",
+  remove_image:"✕ ہٹائیں",
+  label_location:"آپ کو یہ نوٹ کہاں ملا؟ (شہر / علاقہ — اختیاری)",
+  placeholder_location:"مثلاً لکھنؤ، امین آباد بازار",
+  btn_scan:"نوٹ کا تجزیہ کریں", btn_scanning:"تجزیہ ہو رہا ہے...",
+  alert_no_image:"براہ کرم پہلے نوٹ کی تصویر اپ لوڈ کریں۔",
+  loading_currency:"بصری جانچ جاری ہے…",
+  error_currency:"اس تصویر کا تجزیہ کرنے میں مسئلہ پیش آیا۔ صاف تصویر آزمائیں، یا حتمی جانچ کے لیے بینک کاؤنٹنگ مشین / یو وی لیمپ استعمال کریں۔",
+  verdict_genuine:"کوئی واضح مسئلہ نہیں ملا", verdict_suspicious:"بصری بے ضابطگیاں پائی گئیں", verdict_counterfeit:"زیادہ شبہ — جعلی ہو سکتا ہے", verdict_currency_unknown:"غیر حتمی",
+  flags_title_currency:"ہم نے کیا چیک کیا",
+  disclaimer_currency:"یہ صرف تصویر پر مبنی بصری جانچ ہے۔ اس نتیجے پر انحصار کرنے سے پہلے ہمیشہ بینک یا مجاز یو وی/آئی آر ڈیوائس سے تصدیق کریں۔",
+  note_currency_added:"یہ جانچ (گمنام طور پر) کمانڈ سینٹر میں دکھائے گئے لائیو انٹیلیجنس فیڈ میں شامل کر دی گئی ہے۔",
+  stat_currency_total:"چیک شدہ نوٹ", stat_currency_flagged:"مشکوک نشان زدہ نوٹ",
+  section_currency_feed:"حالیہ کرنسی چیکس",
+  col_time:"وقت", col_denom:"مالیت", col_verdict:"نتیجہ", col_location:"مقام",
+  empty_currency_feed:"اس سیشن میں ابھی تک کوئی نوٹ چیک نہیں کیا گیا۔",
+  unclassified_denom:"غیر واضح", location_unknown:"غیر متعین"
+}
+};
+
+function getDict(lang){
+  return Object.assign({}, I18N.en, I18N[lang]||{}, I18N_EXTRA.en, I18N_EXTRA[lang]||{});
+}
+
+const RTL_LANGS = ["ur"];
+let currentLang = "en";
+
+/* ---------------- apply translations to DOM ---------------- */
+function applyTranslations(lang){
+  currentLang = lang;
+  const dict = getDict(lang);
+  document.querySelectorAll("[data-i18n]").forEach(el=>{
+    const key = el.getAttribute("data-i18n");
+    if(dict[key] !== undefined) el.textContent = dict[key];
+  });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach(el=>{
+    const key = el.getAttribute("data-i18n-placeholder");
+    if(dict[key] !== undefined) el.setAttribute("placeholder", dict[key]);
+  });
+  document.getElementById("verdict-lang-display").value = dict.verdict_lang_value || "English";
+  document.documentElement.setAttribute("lang", lang);
+  document.documentElement.setAttribute("dir", RTL_LANGS.includes(lang) ? "rtl" : "ltr");
+  document.body.classList.toggle("script-active", lang !== "en");
+  // re-render dynamic sections that were built with the old language
+  if(document.getElementById("view-command").classList.contains("active")) loadCommandCenter();
+}
+
+document.getElementById("global-lang").addEventListener("change", (e)=>{
+  applyTranslations(e.target.value);
+});
+
+// ---------- tab switching ----------
+document.querySelectorAll(".tab-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+    document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("view-"+btn.dataset.view).classList.add("active");
+    if(btn.dataset.view === "command") loadCommandCenter();
+  });
+});
+
+// ---------- chip selection ----------
+let selectedClaim = "";
+document.querySelectorAll("#claim-chips .chip").forEach(chip=>{
+  chip.addEventListener("click", ()=>{
+    document.querySelectorAll("#claim-chips .chip").forEach(c=>c.classList.remove("selected"));
+    chip.classList.add("selected");
+    selectedClaim = chip.dataset.val;
+  });
+});
+
+/* Map language code -> full English language name for LLM instruction,
+   since the model reasons better with explicit language names. */
+const LANG_NAME_FOR_LLM = {
+  en:"English", hi:"Hindi", ta:"Tamil", te:"Telugu", bn:"Bengali", mr:"Marathi",
+  kn:"Kannada", gu:"Gujarati", ml:"Malayalam", pa:"Punjabi", or:"Odia", ur:"Urdu"
+};
+
+// ---------- risk classification ----------
+async function classifyReport(payload){
+  const languageName = LANG_NAME_FOR_LLM[payload.langCode] || "English";
+  const systemPrompt = `You are a fraud-risk classification engine for an Indian citizen safety platform. You analyse a real-time description of a suspicious call, video call, or message and output ONLY a JSON object (no markdown fences, no preamble, no commentary) with this exact shape:
+
+{
+  "risk_level": "high" | "medium" | "low",
+  "confidence": 0.0-1.0,
+  "scam_type": "short label, written in ${languageName}, e.g. the local-language equivalent of 'Digital Arrest Impersonation', 'Courier/Customs Scam', 'KYC/Bank Fraud', 'Investment Fraud', 'Utility Disconnection Scam', 'Sextortion', or 'Unclear/Insufficient Info'",
+  "red_flags": ["short phrase in ${languageName}", "short phrase in ${languageName}", ...up to 5],
+  "advisory": "2-3 sentences of direct, calm, actionable advice for the citizen, written entirely in ${languageName}. Never tell them to make payments or share OTP/bank details. If high risk, explicitly state that no Indian government agency conducts arrests or investigations over video call or demands money transfers to 'verification accounts'.",
+  "recommended_action": "one short sentence in ${languageName} on the single next step they should take right now"
+}
+
+All natural-language text fields (scam_type, red_flags, advisory, recommended_action) MUST be written in ${languageName}, regardless of what language the citizen's description below is written in.
+
+Ground truth patterns for "digital arrest" and related scams: impersonation of CBI/ED/Customs/Police/RBI, claims of parcels containing drugs/illegal items, claims of Aadhaar/SIM/bank account linked to crime, insistence on staying on video call continuously, isolation instructions (do not tell family, do not disconnect), urgency and fear, demands for money transfer to "verification" or "RBI safe" accounts, fake e-warrants or CBI letterheads shown on screen, threats of immediate arrest.
+Real government agencies never conduct investigations, arrests, or bail processes over phone/video call, never demand money transfers for "verification", and never ask you to stay on a continuous video call.
+
+Be conservative: if the description clearly matches known scam patterns, mark risk_level "high" even if the citizen sounds unsure. If the description is genuinely ambiguous or could be a legitimate contact, mark "low" or "medium" and say so plainly. Do not invent details not present in the input.`;
+
+  const userMsg = `Caller/sender number: ${payload.number || "not provided"}
+Claimed identity/reason: ${payload.claim || "not specified"}
+Contact method: ${payload.method}
+Citizen's description: "${payload.description}"`;
+
+  const response = await fetch("/api/llm", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-5",
+      max_tokens: 1000,
+      system: systemPrompt,
+      messages: [{ role: "user", content: userMsg }]
+    })
+  });
+
+  const data = await response.json();
+  const textBlock = (data.content || []).find(b => b.type === "text");
+  if(!textBlock) throw new Error("No text response from classifier");
+  const cleaned = textBlock.text.replace(/```json|```/g, "").trim();
+  return JSON.parse(cleaned);
+}
+
+// ---------- submit handler ----------
+document.getElementById("btn-analyze").addEventListener("click", async ()=>{
+  const dict = getDict(currentLang);
+  const number = document.getElementById("in-number").value.trim();
+  const description = document.getElementById("in-desc").value.trim();
+  const method = document.getElementById("in-method").value;
+  const resultCard = document.getElementById("result-card");
+  const btn = document.getElementById("btn-analyze");
+
+  if(!description){
+    alert(dict.alert_empty_desc);
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = dict.btn_analyzing;
+  resultCard.style.display = "block";
+  resultCard.innerHTML = `<div class="loading"><div class="spinner"></div> ${dict.loading_text}</div>`;
+
+  try{
+    const payload = { number, claim: selectedClaim, description, method, langCode: currentLang };
+    const result = await classifyReport(payload);
+    renderResult(result);
+    await saveReport(payload, result);
+  }catch(err){
+    resultCard.innerHTML = `<div class="loading" style="color:var(--danger);">${dict.error_text}</div>`;
+    console.error(err);
+  }finally{
+    btn.disabled = false;
+    btn.textContent = dict.btn_analyze;
+  }
+});
+
+function renderResult(result){
+  const dict = getDict(currentLang);
+  const resultCard = document.getElementById("result-card");
+  const levelLabel = { high: dict.verdict_high, medium: dict.verdict_medium, low: dict.verdict_low }[result.risk_level] || dict.verdict_unknown;
+  const flagsHtml = (result.red_flags || []).map(f=>`<li>${escapeHtml(f)}</li>`).join("");
+
+  resultCard.innerHTML = `
+    <div class="result-head">
+      <span class="verdict-badge ${result.risk_level}">${escapeHtml(levelLabel)}</span>
+      <span class="confidence">${dict.confidence_label} ${(Math.round((result.confidence||0)*100))}%</span>
+    </div>
+    <p class="advisory-text">${escapeHtml(result.advisory || "")}</p>
+    ${flagsHtml ? `<div class="flags-title">${escapeHtml(dict.flags_title_prefix)} ${escapeHtml(result.scam_type||"")}</div><ul class="flags-list">${flagsHtml}</ul>` : ""}
+    <div class="action-row">
+      <a class="action-link primary" href="https://www.cybercrime.gov.in" target="_blank" rel="noopener">${escapeHtml(dict.action_file)}</a>
+      <a class="action-link" href="tel:1930">${escapeHtml(dict.action_call)}</a>
+    </div>
+    <div class="note">${escapeHtml(result.recommended_action || "")} — ${escapeHtml(dict.note_suffix)}</div>
+  `;
+}
+
+function escapeHtml(str){
+  const d = document.createElement("div");
+  d.textContent = str == null ? "" : str;
+  return d.innerHTML;
+}
+
+// ---------- persistence ----------
+// ---------- kv backend helpers (Upstash-backed, via /api/kv) ----------
+async function kvSet(key, value){
+  const r = await fetch("/api/kv", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action: "set", key, value })
+  });
+  return r.json();
+}
+async function kvList(prefix){
+  const r = await fetch("/api/kv", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action: "list", prefix })
+  });
+  return r.json(); // { keys: [...], values: [...] }
+}
+
+async function saveReport(payload, result){
+  const id = "rep_" + Date.now() + "_" + Math.random().toString(36).slice(2,7);
+  const record = {
+    id,
+    timestamp: new Date().toISOString(),
+    number: payload.number || "unknown",
+    method: payload.method,
+    claim: payload.claim,
+    description: payload.description,
+    lang: payload.langCode,
+    risk_level: result.risk_level,
+    confidence: result.confidence,
+    scam_type: result.scam_type,
+    red_flags: result.red_flags || []
+  };
+  try{
+    await kvSet(STORAGE_KEY_PREFIX + id, JSON.stringify(record));
+  }catch(e){
+    console.error("Storage failed", e);
+  }
+}
+
+async function getAllReports(){
+  try{
+    const listRes = await kvList(STORAGE_KEY_PREFIX);
+    if(!listRes || !listRes.values || listRes.values.length === 0) return [];
+    const records = listRes.values
+      .filter(Boolean)
+      .map(v => { try{ return JSON.parse(v); }catch(e){ return null; } })
+      .filter(Boolean);
+    records.sort((a,b)=> new Date(b.timestamp) - new Date(a.timestamp));
+    return records;
+  }catch(e){
+    console.error("List failed", e);
+    return [];
+  }
+}
+
+// ---------- clustering ----------
+function normalizeNumber(n){
+  if(!n) return null;
+  const digits = n.replace(/\D/g,"");
+  return digits.length >= 6 ? digits.slice(-10) : null;
+}
+
+function clusterReports(reports){
+  const now = Date.now();
+  const withinWindow = reports.filter(r => (now - new Date(r.timestamp).getTime()) <= CAMPAIGN_TIME_WINDOW_HRS*3600*1000);
+  const clusters = {};
+
+  withinWindow.forEach(r=>{
+    const normNum = normalizeNumber(r.number);
+    const key = normNum ? ("num:"+normNum) : ("type:"+(r.scam_type||"unknown"));
+    if(!clusters[key]) clusters[key] = { key, reports: [], scam_type: r.scam_type, sample_number: r.number };
+    clusters[key].reports.push(r);
+  });
+
+  return Object.values(clusters)
+    .filter(c => c.reports.length >= 2 || (c.reports.length === 1 && c.reports[0].risk_level === "high" && normalizeNumber(c.reports[0].number)))
+    .map((c,i)=>{
+      const highCount = c.reports.filter(r=>r.risk_level==="high").length;
+      const severity = highCount >= 2 ? "high" : (highCount >= 1 ? "medium" : "low");
+      return {
+        id: "CMP-" + (1000 + i),
+        scam_type: c.scam_type || "Unclassified",
+        sample_number: c.sample_number,
+        count: c.reports.length,
+        severity,
+        reports: c.reports
+      };
+    })
+    .sort((a,b)=> b.count - a.count);
+}
+
+// ---------- command center rendering ----------
+async function loadCommandCenter(){
+  const dict = getDict(currentLang);
+  const reports = await getAllReports();
+  const clusters = clusterReports(reports);
+
+  document.getElementById("stat-total").textContent = reports.length;
+  document.getElementById("stat-high").textContent = reports.filter(r=>r.risk_level==="high").length;
+  document.getElementById("stat-clusters").textContent = clusters.length;
+  const distinctNumbers = new Set(reports.map(r=>normalizeNumber(r.number)).filter(Boolean));
+  document.getElementById("stat-numbers").textContent = distinctNumbers.size;
+
+  const ticker = document.getElementById("ticker-track");
+  if(clusters.length === 0){
+    ticker.innerHTML = `<div class="ticker-item">${escapeHtml(dict.ticker_empty)}</div>`;
+  }else{
+    const items = clusters.map(c => `<span class="ticker-item"><span class="id">${c.id}</span> — ${escapeHtml(c.scam_type)} · ${c.count} ${c.count>1?dict.reports_count_suffix:dict.report_count_suffix} · ${c.severity.toUpperCase()}</span>`);
+    ticker.innerHTML = items.join("") + items.join("");
+  }
+
+  const body = document.getElementById("cluster-body");
+  if(clusters.length === 0){
+    body.innerHTML = `<div class="empty-state">${escapeHtml(dict.empty_clusters)}</div>`;
+  }else{
+    body.innerHTML = clusters.map(c => `
+      <div class="cluster-row">
+        <div class="cluster-id">${c.id}</div>
+        <div class="cluster-type">${escapeHtml(c.scam_type)}<span class="sample-num">${escapeHtml(c.sample_number || dict.multiple_numbers)}</span></div>
+        <div><span class="severity-pill" style="background:${sevBg(c.severity)};color:${sevColor(c.severity)};">${c.severity.toUpperCase()}</span></div>
+        <div class="cluster-count">${c.count} ${c.count>1?dict.reports_count_suffix:dict.report_count_suffix}</div>
+        <div><button class="export-btn" onclick='exportPacket(${JSON.stringify(JSON.stringify(c)).replace(/'/g,"&apos;")})'>${dict.packet_btn}</button></div>
+      </div>
+    `).join("");
+  }
+
+  const feed = document.getElementById("reports-feed");
+  if(reports.length === 0){
+    feed.innerHTML = `<div class="empty-state">${escapeHtml(dict.empty_feed)}</div>`;
+  }else{
+    feed.innerHTML = reports.slice(0,25).map(r => `
+      <div class="feed-row">
+        <div class="feed-time">${new Date(r.timestamp).toLocaleString()}</div>
+        <div><span class="severity-pill" style="background:${sevBg(r.risk_level)};color:${sevColor(r.risk_level)};">${(r.risk_level||"?").toUpperCase()}</span></div>
+        <div>${escapeHtml(r.scam_type || dict.unclassified)}</div>
+        <div class="feed-num">${escapeHtml(r.number || dict.unknown_number)}</div>
+      </div>
+    `).join("");
+  }
+}
+
+function sevBg(s){ return s==="high" ? "var(--danger-bg)" : s==="medium" ? "var(--caution-bg)" : "var(--safe-bg)"; }
+function sevColor(s){ return s==="high" ? "var(--danger)" : s==="medium" ? "var(--caution)" : "var(--safe)"; }
+
+function exportPacket(jsonStr){
+  const cluster = JSON.parse(jsonStr);
+  const packet = {
+    packet_id: "INTEL-" + cluster.id,
+    generated_at: new Date().toISOString(),
+    scam_type: cluster.scam_type,
+    severity: cluster.severity,
+    report_count: cluster.count,
+    linked_reports: cluster.reports.map(r => ({
+      report_id: r.id,
+      timestamp: r.timestamp,
+      number: r.number,
+      method: r.method,
+      claim: r.claim,
+      description: r.description,
+      language: r.lang,
+      risk_level: r.risk_level,
+      confidence: r.confidence,
+      red_flags: r.red_flags
+    })),
+    note: "Auto-generated intelligence packet from citizen-reported data. Structured for jurisdictional handoff and NCRB cross-reference. Not independently verified evidence — requires investigating officer review."
+  };
+  const blob = new Blob([JSON.stringify(packet, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = packet.packet_id + ".json";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+document.getElementById("btn-refresh").addEventListener("click", loadCommandCenter);
+
+/* ============================================================
+   CURRENCY CHECK — image upload + Claude vision classification.
+   This is the "convergence" layer: physical counterfeit currency
+   intelligence feeding the same Command Center as digital fraud
+   reports, per the challenge's multi-source intelligence brief.
+   ============================================================ */
+
+const CURRENCY_STORAGE_PREFIX = "fraudshield:currency:";
+let selectedImageBase64 = null;
+let selectedImageMediaType = null;
+
+const dropzone = document.getElementById("dropzone");
+const fileInput = document.getElementById("currency-file-input");
+const previewWrap = document.getElementById("preview-wrap");
+const previewImg = document.getElementById("preview-img");
+const removeImgBtn = document.getElementById("remove-img-btn");
+const btnScan = document.getElementById("btn-scan");
+
+dropzone.addEventListener("click", ()=> fileInput.click());
+dropzone.addEventListener("dragover", (e)=>{ e.preventDefault(); dropzone.classList.add("dragover"); });
+dropzone.addEventListener("dragleave", ()=> dropzone.classList.remove("dragover"));
+dropzone.addEventListener("drop", (e)=>{
+  e.preventDefault();
+  dropzone.classList.remove("dragover");
+  if(e.dataTransfer.files && e.dataTransfer.files[0]) handleImageFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener("change", (e)=>{
+  if(e.target.files && e.target.files[0]) handleImageFile(e.target.files[0]);
+});
+removeImgBtn.addEventListener("click", (e)=>{
+  e.stopPropagation();
+  clearSelectedImage();
+});
+
+function handleImageFile(file){
+  if(!file.type.startsWith("image/")) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    const fullDataUrl = reader.result; // e.g. data:image/jpeg;base64,XXXX
+    const match = fullDataUrl.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.*)$/);
+    if(!match) return;
+    selectedImageMediaType = match[1];
+    selectedImageBase64 = match[2];
+    previewImg.src = fullDataUrl;
+    previewWrap.style.display = "block";
+    dropzone.style.display = "none";
+    btnScan.disabled = false;
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearSelectedImage(){
+  selectedImageBase64 = null;
+  selectedImageMediaType = null;
+  previewImg.src = "";
+  previewWrap.style.display = "none";
+  dropzone.style.display = "block";
+  fileInput.value = "";
+  btnScan.disabled = true;
+  document.getElementById("currency-result-card").style.display = "none";
+}
+
+async function classifyCurrencyNote(base64Data, mediaType, locationText, langCode){
+  const languageName = LANG_NAME_FOR_LLM[langCode] || "English";
+  const systemPrompt = `You are a visual currency-screening assistant for an Indian public safety platform. You look at a photo of a currency note (expected to be Indian Rupee, Mahatma Gandhi New Series or older series) and output ONLY a JSON object (no markdown fences, no preamble) with this exact shape:
+
+{
+  "denomination_detected": "one of: ₹10, ₹20, ₹50, ₹100, ₹200, ₹500, ₹2000, or 'Unclear' if you cannot tell",
+  "authenticity_verdict": "likely_genuine" | "visual_anomalies_found" | "likely_counterfeit" | "inconclusive",
+  "confidence": 0.0-1.0,
+  "visual_flags": ["short phrase in ${languageName}, up to 5 items — e.g. blurred or misaligned printing, inconsistent font on serial number, colour looks off compared to genuine notes, portrait/watermark area unclear, security thread not visible as a continuous line, image too blurry/dark to assess"],
+  "advisory": "2-3 sentences in ${languageName}. MUST explicitly state that this is a photo-based visual screening only and cannot verify the security thread colour-shift, latent image, or UV/IR features, which require the physical note and proper equipment (UV lamp, bank counting machine, or RBI-authorised device). Recommend physical verification before accepting or rejecting the note based on this alone.",
+  "recommended_action": "one short sentence in ${languageName}"
+}
+
+Assessment approach: examine what is visually assessable from a photo — overall print sharpness and registration, portrait clarity, consistency and alignment of the guilloche/geometric patterns, serial number font consistency and spacing, colour consistency typical of genuine RBI notes, presence and continuity of the visible security thread line, and any obvious smudging, colour bleed, or paper texture anomalies that suggest a photocopy or low-quality print. Do NOT claim to verify UV features, microprinting under magnification, or tactile intaglio print — these are physically impossible to assess from a standard photo, and you must say so in the advisory.
+
+Be calibrated and conservative. If the image is blurry, poorly lit, or too small to assess, use "inconclusive" rather than guessing. If nothing looks wrong within what a photo can show, use "likely_genuine" but still include the standard advisory about physical verification. Never state with certainty that a note is 100% genuine or 100% fake — always frame as a screening-level assessment.`;
+
+  const userText = `Location where note was received (context only, optional): ${locationText || "not specified"}. Analyse the attached photo of the currency note.`;
+
+  const response = await fetch("/api/llm", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-5",
+      max_tokens: 1000,
+      system: systemPrompt,
+      messages: [{
+        role: "user",
+        content: [
+          { type: "image", source: { type: "base64", media_type: mediaType, data: base64Data } },
+          { type: "text", text: userText }
+        ]
+      }]
+    })
+  });
+
+  const data = await response.json();
+  const textBlock = (data.content || []).find(b => b.type === "text");
+  if(!textBlock) throw new Error("No text response from vision classifier");
+  const cleaned = textBlock.text.replace(/```json|```/g, "").trim();
+  return JSON.parse(cleaned);
+}
+
+btnScan.addEventListener("click", async ()=>{
+  const dict = getDict(currentLang);
+  const resultCard = document.getElementById("currency-result-card");
+  const locationText = document.getElementById("in-location").value.trim();
+
+  if(!selectedImageBase64){
+    alert(dict.alert_no_image);
+    return;
+  }
+
+  btnScan.disabled = true;
+  btnScan.textContent = dict.btn_scanning;
+  resultCard.style.display = "block";
+  resultCard.innerHTML = `<div class="loading"><div class="spinner"></div> ${dict.loading_currency}</div>`;
+
+  try{
+    const result = await classifyCurrencyNote(selectedImageBase64, selectedImageMediaType, locationText, currentLang);
+    renderCurrencyResult(result);
+    await saveCurrencyReport(result, locationText);
+  }catch(err){
+    resultCard.innerHTML = `<div class="loading" style="color:var(--danger);">${dict.error_currency}</div>`;
+    console.error(err);
+  }finally{
+    btnScan.disabled = false;
+    btnScan.textContent = dict.btn_scan;
+  }
+});
+
+function renderCurrencyResult(result){
+  const dict = getDict(currentLang);
+  const resultCard = document.getElementById("currency-result-card");
+  const verdictMap = {
+    likely_genuine: { label: dict.verdict_genuine, css: "low" },
+    visual_anomalies_found: { label: dict.verdict_suspicious, css: "medium" },
+    likely_counterfeit: { label: dict.verdict_counterfeit, css: "high" },
+    inconclusive: { label: dict.verdict_currency_unknown, css: "medium" }
+  };
+  const v = verdictMap[result.authenticity_verdict] || { label: dict.verdict_currency_unknown, css: "medium" };
+  const flagsHtml = (result.visual_flags || []).map(f=>`<li>${escapeHtml(f)}</li>`).join("");
+
+  resultCard.innerHTML = `
+    <div class="result-head">
+      <span class="verdict-badge ${v.css}">${escapeHtml(v.label)}</span>
+      <span class="confidence">${dict.confidence_label} ${(Math.round((result.confidence||0)*100))}%</span>
+      <span class="denom-pill">${escapeHtml(result.denomination_detected || dict.unclassified_denom)}</span>
+    </div>
+    <p class="advisory-text">${escapeHtml(result.advisory || "")}</p>
+    ${flagsHtml ? `<div class="flags-title">${escapeHtml(dict.flags_title_currency)}</div><ul class="flags-list">${flagsHtml}</ul>` : ""}
+    <div class="note">${escapeHtml(result.recommended_action || "")} — ${escapeHtml(dict.note_currency_added)}</div>
+    <div class="disclaimer-box">⚠ ${escapeHtml(dict.disclaimer_currency)}</div>
+  `;
+}
+
+async function saveCurrencyReport(result, locationText){
+  const id = "cur_" + Date.now() + "_" + Math.random().toString(36).slice(2,7);
+  const record = {
+    id,
+    timestamp: new Date().toISOString(),
+    location: locationText || "",
+    lang: currentLang,
+    denomination: result.denomination_detected,
+    authenticity_verdict: result.authenticity_verdict,
+    confidence: result.confidence,
+    visual_flags: result.visual_flags || []
+  };
+  try{
+    await kvSet(CURRENCY_STORAGE_PREFIX + id, JSON.stringify(record));
+  }catch(e){
+    console.error("Currency storage failed", e);
+  }
+}
+
+async function getAllCurrencyReports(){
+  try{
+    const listRes = await kvList(CURRENCY_STORAGE_PREFIX);
+    if(!listRes || !listRes.values || listRes.values.length === 0) return [];
+    const records = listRes.values
+      .filter(Boolean)
+      .map(v => { try{ return JSON.parse(v); }catch(e){ return null; } })
+      .filter(Boolean);
+    records.sort((a,b)=> new Date(b.timestamp) - new Date(a.timestamp));
+    return records;
+  }catch(e){
+    console.error("Currency list failed", e);
+    return [];
+  }
+}
+
+/* Extend the Command Center render to include currency-screening stats
+   and a recent-checks table, alongside the existing fraud-report view. */
+const originalLoadCommandCenter = loadCommandCenter;
+loadCommandCenter = async function(){
+  await originalLoadCommandCenter();
+  const dict = getDict(currentLang);
+  const currencyReports = await getAllCurrencyReports();
+
+  document.getElementById("stat-currency-total").textContent = currencyReports.length;
+  document.getElementById("stat-currency-flagged").textContent =
+    currencyReports.filter(r => r.authenticity_verdict === "likely_counterfeit" || r.authenticity_verdict === "visual_anomalies_found").length;
+
+  const verdictLabelMap = {
+    likely_genuine: dict.verdict_genuine,
+    visual_anomalies_found: dict.verdict_suspicious,
+    likely_counterfeit: dict.verdict_counterfeit,
+    inconclusive: dict.verdict_currency_unknown
+  };
+  const verdictSevMap = {
+    likely_genuine: "low", visual_anomalies_found: "medium", likely_counterfeit: "high", inconclusive: "medium"
+  };
+
+  const body = document.getElementById("currency-body");
+  if(currencyReports.length === 0){
+    body.innerHTML = `<div class="empty-state">${escapeHtml(dict.empty_currency_feed)}</div>`;
+  }else{
+    body.innerHTML = currencyReports.slice(0,25).map(r=>{
+      const sev = verdictSevMap[r.authenticity_verdict] || "medium";
+      const label = verdictLabelMap[r.authenticity_verdict] || dict.verdict_currency_unknown;
+      return `
+        <div class="currency-row">
+          <div class="feed-time">${new Date(r.timestamp).toLocaleString()}</div>
+          <div class="denom-pill" style="margin-left:0;">${escapeHtml(r.denomination || dict.unclassified_denom)}</div>
+          <div><span class="severity-pill" style="background:${sevBg(sev)};color:${sevColor(sev)};">${escapeHtml(label)}</span></div>
+          <div>${escapeHtml(r.location || dict.location_unknown)}</div>
+        </div>
+      `;
+    }).join("");
+  }
+};
+
+// initial paint
+applyTranslations("en");
+if(document.getElementById("view-command").classList.contains("active")) loadCommandCenter();
+</script>
+</body>
+</html>

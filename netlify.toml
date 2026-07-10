@@ -1,0 +1,15 @@
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+# These redirects let the frontend call /api/anthropic and /api/kv
+# on Netlify exactly like it does on Vercel, with no code differences.
+[[redirects]]
+  from = "/api/llm"
+  to = "/.netlify/functions/llm"
+  status = 200
+
+[[redirects]]
+  from = "/api/kv"
+  to = "/.netlify/functions/kv"
+  status = 200
