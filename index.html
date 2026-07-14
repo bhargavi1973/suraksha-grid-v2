@@ -368,9 +368,29 @@
   .voice-actions{display:flex;gap:8px;flex-wrap:wrap;}
   .transcribe-status{margin-top:8px;font-size:12px;color:var(--text-dim);display:flex;align-items:center;gap:8px;}
   .transcribe-status.error{color:var(--danger);}
+
+  /* ---------- geospatial intelligence ---------- */
+  .geo-grid{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:28px;}
+  @media (max-width:860px){.geo-grid{grid-template-columns:1fr;}}
+  .geo-map-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;}
+  .geo-map-container{height:360px;border-radius:8px;overflow:hidden;background:var(--panel-2);}
+  .geo-hotspot-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;}
+  .geo-hotspot-item{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:9px 0;border-bottom:1px solid var(--line);font-size:13px;
+  }
+  .geo-hotspot-item:last-child{border-bottom:none;}
+  .geo-hotspot-name{color:var(--text);}
+  .geo-hotspot-count{
+    font-family:var(--font-mono);font-weight:700;font-size:12px;
+    background:var(--panel-2);padding:3px 9px;border-radius:12px;color:var(--caution);
+  }
+  .leaflet-popup-content{font-family:var(--font-body);font-size:12.5px;}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 </head>
 <body>
 
@@ -495,6 +515,11 @@
           <div class="transcribe-status" id="transcribe-status" style="display:none;"></div>
         </div>
 
+        <div class="field">
+          <label data-i18n="label_location_report">Where did this happen? (city / area — optional)</label>
+          <input type="text" id="in-location-report" data-i18n-placeholder="placeholder_location" placeholder="e.g. Lucknow, Aminabad market" />
+        </div>
+
         <div class="row2">
           <div class="field">
             <label data-i18n="label_method">Contact method</label>
@@ -597,6 +622,19 @@
       <div class="stat-card">
         <p class="stat-num" id="stat-currency-flagged" style="color:var(--danger);">0</p>
         <div class="stat-label" data-i18n="stat_currency_flagged">Notes flagged suspicious</div>
+      </div>
+    </div>
+
+    <div class="section-title"><span data-i18n="section_geospatial">Geospatial Intelligence</span></div>
+    <div class="geo-grid">
+      <div class="geo-map-card">
+        <div class="geo-map-container" id="geo-map"></div>
+      </div>
+      <div class="geo-hotspot-card">
+        <div class="chart-card-title" data-i18n="geo_hotspots_title">Top Locations (last 14 days)</div>
+        <div id="geo-hotspot-list">
+          <div class="chart-empty" style="height:auto;padding:20px 0;" data-i18n="geo_no_data">No location data yet</div>
+        </div>
       </div>
     </div>
 
@@ -1340,7 +1378,9 @@ en: {
   voice_label:"🎙️ Add a voice recording (optional)", voice_record_btn:"● Record", voice_stop_btn:"■ Stop",
   voice_upload_btn:"📎 Upload audio", voice_transcribe_btn:"Transcribe → fill description", voice_remove_btn:"✕ Remove",
   voice_transcribing:"Transcribing audio...", voice_transcribe_error:"Could not transcribe this audio. You can still type the description manually.",
-  voice_mic_denied:"Microphone access was denied or unavailable. You can upload an audio file instead.", voice_prefix_label:"[Transcribed from audio]"
+  voice_mic_denied:"Microphone access was denied or unavailable. You can upload an audio file instead.", voice_prefix_label:"[Transcribed from audio]",
+  section_geospatial:"Geospatial Intelligence", label_location_report:"Where did this happen? (city / area — optional)",
+  geo_hotspots_title:"Top Locations (last 14 days)", geo_no_data:"No location data yet"
 },
 hi: {
   login_eyebrow:"आप सुरक्षा ग्रिड तक कैसे पहुँच रहे हैं चुनें",
@@ -1359,7 +1399,9 @@ hi: {
   voice_label:"🎙️ आवाज़ रिकॉर्डिंग जोड़ें (वैकल्पिक)", voice_record_btn:"● रिकॉर्ड करें", voice_stop_btn:"■ रोकें",
   voice_upload_btn:"📎 ऑडियो अपलोड करें", voice_transcribe_btn:"ट्रांसक्राइब करें → विवरण भरें", voice_remove_btn:"✕ हटाएं",
   voice_transcribing:"ऑडियो ट्रांसक्राइब हो रहा है...", voice_transcribe_error:"इस ऑडियो को ट्रांसक्राइब नहीं किया जा सका। आप विवरण खुद टाइप कर सकते हैं।",
-  voice_mic_denied:"माइक्रोफोन एक्सेस अस्वीकृत या अनुपलब्ध था। आप इसके बजाय एक ऑडियो फाइल अपलोड कर सकते हैं।", voice_prefix_label:"[ऑडियो से ट्रांसक्राइब किया गया]"
+  voice_mic_denied:"माइक्रोफोन एक्सेस अस्वीकृत या अनुपलब्ध था। आप इसके बजाय एक ऑडियो फाइल अपलोड कर सकते हैं।", voice_prefix_label:"[ऑडियो से ट्रांसक्राइब किया गया]",
+  section_geospatial:"भौगोलिक विश्लेषण", label_location_report:"यह कहाँ हुआ? (शहर / क्षेत्र — वैकल्पिक)",
+  geo_hotspots_title:"शीर्ष स्थान (पिछले 14 दिन)", geo_no_data:"अभी तक कोई स्थान डेटा नहीं है"
 },
 ta: {
   login_eyebrow:"சுரக்ஷா கிரிட்டை நீங்கள் எவ்வாறு அணுகுகிறீர்கள் என்பதைத் தேர்ந்தெடுக்கவும்",
@@ -1378,7 +1420,9 @@ ta: {
   voice_label:"🎙️ குரல் பதிவைச் சேர்க்கவும் (விருப்பம்)", voice_record_btn:"● பதிவு செய்யவும்", voice_stop_btn:"■ நிறுத்து",
   voice_upload_btn:"📎 ஆடியோவைப் பதிவேற்றவும்", voice_transcribe_btn:"படியெடுக்கவும் → விவரத்தை நிரப்பவும்", voice_remove_btn:"✕ அகற்று",
   voice_transcribing:"ஆடியோ படியெடுக்கப்படுகிறது...", voice_transcribe_error:"இந்த ஆடியோவை படியெடுக்க முடியவில்லை. நீங்கள் இன்னும் விவரத்தை நீங்களே தட்டச்சு செய்யலாம்.",
-  voice_mic_denied:"மைக்ரோஃபோன் அணுகல் மறுக்கப்பட்டது அல்லது கிடைக்கவில்லை. அதற்குப் பதிலாக ஆடியோ கோப்பைப் பதிவேற்றலாம்.", voice_prefix_label:"[ஆடியோவிலிருந்து படியெடுக்கப்பட்டது]"
+  voice_mic_denied:"மைக்ரோஃபோன் அணுகல் மறுக்கப்பட்டது அல்லது கிடைக்கவில்லை. அதற்குப் பதிலாக ஆடியோ கோப்பைப் பதிவேற்றலாம்.", voice_prefix_label:"[ஆடியோவிலிருந்து படியெடுக்கப்பட்டது]",
+  section_geospatial:"புவிசார் நுண்ணறிவு", label_location_report:"இது எங்கு நடந்தது? (நகரம் / பகுதி — விருப்பம்)",
+  geo_hotspots_title:"முதன்மை இடங்கள் (கடந்த 14 நாட்கள்)", geo_no_data:"இன்னும் இட தரவு இல்லை"
 },
 te: {
   login_eyebrow:"మీరు సురక్ష గ్రిడ్‌ను ఎలా యాక్సెస్ చేస్తున్నారో ఎంచుకోండి",
@@ -1397,7 +1441,9 @@ te: {
   voice_label:"🎙️ వాయిస్ రికార్డింగ్ జోడించండి (ఐచ్ఛికం)", voice_record_btn:"● రికార్డ్ చేయండి", voice_stop_btn:"■ ఆపు",
   voice_upload_btn:"📎 ఆడియో అప్‌లోడ్ చేయండి", voice_transcribe_btn:"ట్రాన్స్క్రైబ్ చేయండి → వివరణ నింపండి", voice_remove_btn:"✕ తొలగించు",
   voice_transcribing:"ఆడియో ట్రాన్స్క్రైబ్ అవుతోంది...", voice_transcribe_error:"ఈ ఆడియోను ట్రాన్స్క్రైబ్ చేయలేకపోయాము. మీరు ఇప్పటికీ వివరణను మీరే టైప్ చేయవచ్చు.",
-  voice_mic_denied:"మైక్రోఫోన్ యాక్సెస్ నిరాకరించబడింది లేదా అందుబాటులో లేదు. బదులుగా మీరు ఆడియో ఫైల్‌ను అప్‌లోడ్ చేయవచ్చు.", voice_prefix_label:"[ఆడియో నుండి ట్రాన్స్క్రైబ్ చేయబడింది]"
+  voice_mic_denied:"మైక్రోఫోన్ యాక్సెస్ నిరాకరించబడింది లేదా అందుబాటులో లేదు. బదులుగా మీరు ఆడియో ఫైల్‌ను అప్‌లోడ్ చేయవచ్చు.", voice_prefix_label:"[ఆడియో నుండి ట్రాన్స్క్రైబ్ చేయబడింది]",
+  section_geospatial:"భౌగోళిక విశ్లేషణ", label_location_report:"ఇది ఎక్కడ జరిగింది? (నగరం / ప్రాంతం — ఐచ్ఛికం)",
+  geo_hotspots_title:"అగ్రస్థాన ప్రదేశాలు (గత 14 రోజులు)", geo_no_data:"ఇంకా స్థాన డేటా లేదు"
 },
 bn: {
   login_eyebrow:"আপনি সুরক্ষা গ্রিড কীভাবে অ্যাক্সেস করছেন তা বেছে নিন",
@@ -1416,7 +1462,9 @@ bn: {
   voice_label:"🎙️ ভয়েস রেকর্ডিং যোগ করুন (ঐচ্ছিক)", voice_record_btn:"● রেকর্ড করুন", voice_stop_btn:"■ থামুন",
   voice_upload_btn:"📎 অডিও আপলোড করুন", voice_transcribe_btn:"ট্রান্সক্রাইব করুন → বিবরণ পূরণ করুন", voice_remove_btn:"✕ সরান",
   voice_transcribing:"অডিও ট্রান্সক্রাইব হচ্ছে...", voice_transcribe_error:"এই অডিওটি ট্রান্সক্রাইব করা যায়নি। আপনি নিজে বিবরণ টাইপ করতে পারেন।",
-  voice_mic_denied:"মাইক্রোফোন অ্যাক্সেস প্রত্যাখ্যাত বা অনুপলব্ধ ছিল। আপনি পরিবর্তে একটি অডিও ফাইল আপলোড করতে পারেন।", voice_prefix_label:"[অডিও থেকে ট্রান্সক্রাইব করা হয়েছে]"
+  voice_mic_denied:"মাইক্রোফোন অ্যাক্সেস প্রত্যাখ্যাত বা অনুপলব্ধ ছিল। আপনি পরিবর্তে একটি অডিও ফাইল আপলোড করতে পারেন।", voice_prefix_label:"[অডিও থেকে ট্রান্সক্রাইব করা হয়েছে]",
+  section_geospatial:"ভৌগোলিক বিশ্লেষণ", label_location_report:"এটি কোথায় ঘটেছে? (শহর / এলাকা — ঐচ্ছিক)",
+  geo_hotspots_title:"শীর্ষ স্থান (গত ১৪ দিন)", geo_no_data:"এখনও কোনো অবস্থানের তথ্য নেই"
 },
 mr: {
   login_eyebrow:"तुम्ही सुरक्षा ग्रिड कसे अॅक्सेस करत आहात ते निवडा",
@@ -1435,7 +1483,9 @@ mr: {
   voice_label:"🎙️ आवाज रेकॉर्डिंग जोडा (पर्यायी)", voice_record_btn:"● रेकॉर्ड करा", voice_stop_btn:"■ थांबवा",
   voice_upload_btn:"📎 ऑडिओ अपलोड करा", voice_transcribe_btn:"ट्रान्सक्राइब करा → वर्णन भरा", voice_remove_btn:"✕ काढा",
   voice_transcribing:"ऑडिओ ट्रान्सक्राइब होत आहे...", voice_transcribe_error:"हा ऑडिओ ट्रान्सक्राइब करता आला नाही. तुम्ही स्वतः वर्णन टाइप करू शकता.",
-  voice_mic_denied:"मायक्रोफोन प्रवेश नाकारला गेला किंवा उपलब्ध नव्हता. त्याऐवजी तुम्ही ऑडिओ फाइल अपलोड करू शकता.", voice_prefix_label:"[ऑडिओवरून ट्रान्सक्राइब केले]"
+  voice_mic_denied:"मायक्रोफोन प्रवेश नाकारला गेला किंवा उपलब्ध नव्हता. त्याऐवजी तुम्ही ऑडिओ फाइल अपलोड करू शकता.", voice_prefix_label:"[ऑडिओवरून ट्रान्सक्राइब केले]",
+  section_geospatial:"भौगोलिक विश्लेषण", label_location_report:"हे कुठे घडले? (शहर / भाग — पर्यायी)",
+  geo_hotspots_title:"शीर्ष ठिकाणे (गेले 14 दिवस)", geo_no_data:"अद्याप स्थान डेटा नाही"
 },
 kn: {
   login_eyebrow:"ನೀವು ಸುರಕ್ಷಾ ಗ್ರಿಡ್ ಅನ್ನು ಹೇಗೆ ಪ್ರವೇಶಿಸುತ್ತಿದ್ದೀರಿ ಎಂಬುದನ್ನು ಆಯ್ಕೆಮಾಡಿ",
@@ -1454,7 +1504,9 @@ kn: {
   voice_label:"🎙️ ಧ್ವನಿ ರೆಕಾರ್ಡಿಂಗ್ ಸೇರಿಸಿ (ಐಚ್ಛಿಕ)", voice_record_btn:"● ರೆಕಾರ್ಡ್ ಮಾಡಿ", voice_stop_btn:"■ ನಿಲ್ಲಿಸಿ",
   voice_upload_btn:"📎 ಆಡಿಯೋ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ", voice_transcribe_btn:"ಪ್ರತಿಲೇಖಿಸಿ → ವಿವರಣೆ ತುಂಬಿ", voice_remove_btn:"✕ ತೆಗೆದುಹಾಕಿ",
   voice_transcribing:"ಆಡಿಯೋ ಪ್ರತಿಲೇಖನ ಆಗುತ್ತಿದೆ...", voice_transcribe_error:"ಈ ಆಡಿಯೋವನ್ನು ಪ್ರತಿಲೇಖಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ನೀವು ಇನ್ನೂ ವಿವರಣೆಯನ್ನು ನೀವೇ ಟೈಪ್ ಮಾಡಬಹುದು.",
-  voice_mic_denied:"ಮೈಕ್ರೊಫೋನ್ ಪ್ರವೇಶವನ್ನು ನಿರಾಕರಿಸಲಾಗಿದೆ ಅಥವಾ ಲಭ್ಯವಿಲ್ಲ. ಬದಲಿಗೆ ನೀವು ಆಡಿಯೋ ಫೈಲ್ ಅಪ್‌ಲೋಡ್ ಮಾಡಬಹುದು.", voice_prefix_label:"[ಆಡಿಯೋದಿಂದ ಪ್ರತಿಲೇಖಿಸಲಾಗಿದೆ]"
+  voice_mic_denied:"ಮೈಕ್ರೊಫೋನ್ ಪ್ರವೇಶವನ್ನು ನಿರಾಕರಿಸಲಾಗಿದೆ ಅಥವಾ ಲಭ್ಯವಿಲ್ಲ. ಬದಲಿಗೆ ನೀವು ಆಡಿಯೋ ಫೈಲ್ ಅಪ್‌ಲೋಡ್ ಮಾಡಬಹುದು.", voice_prefix_label:"[ಆಡಿಯೋದಿಂದ ಪ್ರತಿಲೇಖಿಸಲಾಗಿದೆ]",
+  section_geospatial:"ಭೌಗೋಳಿಕ ಗುಪ್ತಚರ", label_location_report:"ಇದು ಎಲ್ಲಿ ನಡೆಯಿತು? (ನಗರ / ಪ್ರದೇಶ — ಐಚ್ಛಿಕ)",
+  geo_hotspots_title:"ಅಗ್ರ ಸ್ಥಳಗಳು (ಕಳೆದ 14 ದಿನಗಳು)", geo_no_data:"ಇನ್ನೂ ಸ್ಥಳ ಡೇಟಾ ಇಲ್ಲ"
 },
 gu: {
   login_eyebrow:"તમે સુરક્ષા ગ્રિડને કેવી રીતે એક્સેસ કરી રહ્યા છો તે પસંદ કરો",
@@ -1473,7 +1525,9 @@ gu: {
   voice_label:"🎙️ વૉઇસ રેકોર્ડિંગ ઉમેરો (વૈકલ્પિક)", voice_record_btn:"● રેકોર્ડ કરો", voice_stop_btn:"■ રોકો",
   voice_upload_btn:"📎 ઑડિયો અપલોડ કરો", voice_transcribe_btn:"ટ્રાન્સક્રાઇબ કરો → વર્ણન ભરો", voice_remove_btn:"✕ દૂર કરો",
   voice_transcribing:"ઑડિયો ટ્રાન્સક્રાઇબ થઈ રહ્યું છે...", voice_transcribe_error:"આ ઑડિયો ટ્રાન્સક્રાઇબ કરી શકાયું નથી. તમે વર્ણન જાતે ટાઇપ કરી શકો છો.",
-  voice_mic_denied:"માઇક્રોફોન ઍક્સેસ નકારવામાં આવ્યો અથવા ઉપલબ્ધ ન હતો. તેના બદલે તમે ઑડિયો ફાઇલ અપલોડ કરી શકો છો.", voice_prefix_label:"[ઑડિયોમાંથી ટ્રાન્સક્રાઇબ કરેલ]"
+  voice_mic_denied:"માઇક્રોફોન ઍક્સેસ નકારવામાં આવ્યો અથવા ઉપલબ્ધ ન હતો. તેના બદલે તમે ઑડિયો ફાઇલ અપલોડ કરી શકો છો.", voice_prefix_label:"[ઑડિયોમાંથી ટ્રાન્સક્રાઇબ કરેલ]",
+  section_geospatial:"ભૌગોલિક બુદ્ધિ", label_location_report:"આ ક્યાં થયું? (શહેર / વિસ્તાર — વૈકલ્પિક)",
+  geo_hotspots_title:"ટોચના સ્થાનો (છેલ્લા 14 દિવસ)", geo_no_data:"હજુ સુધી કોઈ સ્થાન ડેટા નથી"
 },
 ml: {
   login_eyebrow:"നിങ്ങൾ സുരക്ഷാ ഗ്രിഡ് എങ്ങനെ ആക്‌സസ് ചെയ്യുന്നു എന്ന് തിരഞ്ഞെടുക്കുക",
@@ -1492,7 +1546,9 @@ ml: {
   voice_label:"🎙️ ശബ്ദ റെക്കോർഡിംഗ് ചേർക്കുക (ഓപ്ഷണൽ)", voice_record_btn:"● റെക്കോർഡ് ചെയ്യുക", voice_stop_btn:"■ നിർത്തുക",
   voice_upload_btn:"📎 ഓഡിയോ അപ്‌ലോഡ് ചെയ്യുക", voice_transcribe_btn:"ട്രാൻസ്ക്രൈബ് ചെയ്യുക → വിവരണം പൂരിപ്പിക്കുക", voice_remove_btn:"✕ നീക്കം ചെയ്യുക",
   voice_transcribing:"ഓഡിയോ ട്രാൻസ്ക്രൈബ് ചെയ്യുന്നു...", voice_transcribe_error:"ഈ ഓഡിയോ ട്രാൻസ്ക്രൈബ് ചെയ്യാൻ കഴിഞ്ഞില്ല. നിങ്ങൾക്ക് ഇപ്പോഴും വിവരണം സ്വയം ടൈപ്പ് ചെയ്യാം.",
-  voice_mic_denied:"മൈക്രോഫോൺ ആക്‌സസ് നിരസിക്കപ്പെട്ടു അല്ലെങ്കിൽ ലഭ്യമല്ല. പകരം നിങ്ങൾക്ക് ഒരു ഓഡിയോ ഫയൽ അപ്‌ലോഡ് ചെയ്യാം.", voice_prefix_label:"[ഓഡിയോയിൽ നിന്ന് ട്രാൻസ്ക്രൈബ് ചെയ്തത്]"
+  voice_mic_denied:"മൈക്രോഫോൺ ആക്‌സസ് നിരസിക്കപ്പെട്ടു അല്ലെങ്കിൽ ലഭ്യമല്ല. പകരം നിങ്ങൾക്ക് ഒരു ഓഡിയോ ഫയൽ അപ്‌ലോഡ് ചെയ്യാം.", voice_prefix_label:"[ഓഡിയോയിൽ നിന്ന് ട്രാൻസ്ക്രൈബ് ചെയ്തത്]",
+  section_geospatial:"ഭൂമിശാസ്ത്രപരമായ ഇന്റലിജൻസ്", label_location_report:"ഇത് എവിടെയാണ് സംഭവിച്ചത്? (നഗരം / പ്രദേശം — ഓപ്ഷണൽ)",
+  geo_hotspots_title:"മുൻനിര സ്ഥലങ്ങൾ (കഴിഞ്ഞ 14 ദിവസം)", geo_no_data:"ഇതുവരെ സ്ഥല ഡാറ്റയില്ല"
 },
 pa: {
   login_eyebrow:"ਤੁਸੀਂ ਸੁਰਕਸ਼ਾ ਗਰਿੱਡ ਤੱਕ ਕਿਵੇਂ ਪਹੁੰਚ ਰਹੇ ਹੋ ਚੁਣੋ",
@@ -1511,7 +1567,9 @@ pa: {
   voice_label:"🎙️ ਆਵਾਜ਼ ਰਿਕਾਰਡਿੰਗ ਸ਼ਾਮਲ ਕਰੋ (ਵਿਕਲਪਿਕ)", voice_record_btn:"● ਰਿਕਾਰਡ ਕਰੋ", voice_stop_btn:"■ ਰੋਕੋ",
   voice_upload_btn:"📎 ਆਡੀਓ ਅੱਪਲੋਡ ਕਰੋ", voice_transcribe_btn:"ਟ੍ਰਾਂਸਕ੍ਰਾਈਬ ਕਰੋ → ਵੇਰਵਾ ਭਰੋ", voice_remove_btn:"✕ ਹਟਾਓ",
   voice_transcribing:"ਆਡੀਓ ਟ੍ਰਾਂਸਕ੍ਰਾਈਬ ਹੋ ਰਿਹਾ ਹੈ...", voice_transcribe_error:"ਇਸ ਆਡੀਓ ਨੂੰ ਟ੍ਰਾਂਸਕ੍ਰਾਈਬ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ। ਤੁਸੀਂ ਖੁਦ ਵੇਰਵਾ ਟਾਈਪ ਕਰ ਸਕਦੇ ਹੋ।",
-  voice_mic_denied:"ਮਾਈਕ੍ਰੋਫੋਨ ਪਹੁੰਚ ਤੋਂ ਇਨਕਾਰ ਕੀਤਾ ਗਿਆ ਜਾਂ ਉਪਲਬਧ ਨਹੀਂ ਸੀ। ਤੁਸੀਂ ਇਸਦੀ ਬਜਾਏ ਇੱਕ ਆਡੀਓ ਫਾਈਲ ਅੱਪਲੋਡ ਕਰ ਸਕਦੇ ਹੋ।", voice_prefix_label:"[ਆਡੀਓ ਤੋਂ ਟ੍ਰਾਂਸਕ੍ਰਾਈਬ ਕੀਤਾ ਗਿਆ]"
+  voice_mic_denied:"ਮਾਈਕ੍ਰੋਫੋਨ ਪਹੁੰਚ ਤੋਂ ਇਨਕਾਰ ਕੀਤਾ ਗਿਆ ਜਾਂ ਉਪਲਬਧ ਨਹੀਂ ਸੀ। ਤੁਸੀਂ ਇਸਦੀ ਬਜਾਏ ਇੱਕ ਆਡੀਓ ਫਾਈਲ ਅੱਪਲੋਡ ਕਰ ਸਕਦੇ ਹੋ।", voice_prefix_label:"[ਆਡੀਓ ਤੋਂ ਟ੍ਰਾਂਸਕ੍ਰਾਈਬ ਕੀਤਾ ਗਿਆ]",
+  section_geospatial:"ਭੂਗੋਲਿਕ ਖੁਫੀਆ ਜਾਣਕਾਰੀ", label_location_report:"ਇਹ ਕਿੱਥੇ ਹੋਇਆ? (ਸ਼ਹਿਰ / ਖੇਤਰ — ਵਿਕਲਪਿਕ)",
+  geo_hotspots_title:"ਪ੍ਰਮੁੱਖ ਸਥਾਨ (ਪਿਛਲੇ 14 ਦਿਨ)", geo_no_data:"ਅਜੇ ਤੱਕ ਕੋਈ ਸਥਾਨ ਡਾਟਾ ਨਹੀਂ"
 },
 or: {
   login_eyebrow:"ଆପଣ ସୁରକ୍ଷା ଗ୍ରିଡ୍ କିପରି ଆକ୍ସେସ୍ କରୁଛନ୍ତି ବାଛନ୍ତୁ",
@@ -1530,7 +1588,9 @@ or: {
   voice_label:"🎙️ ଭଏସ୍ ରେକର୍ଡିଂ ଯୋଡନ୍ତୁ (ବୈକଳ୍ପିକ)", voice_record_btn:"● ରେକର୍ଡ୍ କରନ୍ତୁ", voice_stop_btn:"■ ବନ୍ଦ କରନ୍ତୁ",
   voice_upload_btn:"📎 ଅଡିଓ ଅପଲୋଡ୍ କରନ୍ତୁ", voice_transcribe_btn:"ଟ୍ରାନ୍ସକ୍ରାଇବ୍ କରନ୍ତୁ → ବର୍ଣ୍ଣନା ପୂରଣ କରନ୍ତୁ", voice_remove_btn:"✕ ହଟାନ୍ତୁ",
   voice_transcribing:"ଅଡିଓ ଟ୍ରାନ୍ସକ୍ରାଇବ୍ ହେଉଛି...", voice_transcribe_error:"ଏହି ଅଡିଓକୁ ଟ୍ରାନ୍ସକ୍ରାଇବ୍ କରାଯାଇପାରିଲା ନାହିଁ। ଆପଣ ନିଜେ ବର୍ଣ୍ଣନା ଟାଇପ୍ କରିପାରିବେ।",
-  voice_mic_denied:"ମାଇକ୍ରୋଫୋନ୍ ଆକ୍ସେସ୍ ପ୍ରତ୍ୟାଖ୍ୟାନ କରାଯାଇଥିଲା କିମ୍ବା ଉପଲବ୍ଧ ନଥିଲା। ଏହା ପରିବର୍ତ୍ତେ ଆପଣ ଏକ ଅଡିଓ ଫାଇଲ୍ ଅପଲୋଡ୍ କରିପାରିବେ।", voice_prefix_label:"[ଅଡିଓରୁ ଟ୍ରାନ୍ସକ୍ରାଇବ୍ କରାଯାଇଛି]"
+  voice_mic_denied:"ମାଇକ୍ରୋଫୋନ୍ ଆକ୍ସେସ୍ ପ୍ରତ୍ୟାଖ୍ୟାନ କରାଯାଇଥିଲା କିମ୍ବା ଉପଲବ୍ଧ ନଥିଲା। ଏହା ପରିବର୍ତ୍ତେ ଆପଣ ଏକ ଅଡିଓ ଫାଇଲ୍ ଅପଲୋଡ୍ କରିପାରିବେ।", voice_prefix_label:"[ଅଡିଓରୁ ଟ୍ରାନ୍ସକ୍ରାଇବ୍ କରାଯାଇଛି]",
+  section_geospatial:"ଭୌଗୋଳିକ ବୁଦ୍ଧିମତା", label_location_report:"ଏହା କେଉଁଠାରେ ଘଟିଲା? (ସହର / ଅଞ୍ଚଳ — ବୈକଳ୍ପିକ)",
+  geo_hotspots_title:"ଶୀର୍ଷ ସ୍ଥାନଗୁଡିକ (ଗତ 14 ଦିନ)", geo_no_data:"ଏପର୍ଯ୍ୟନ୍ତ କୌଣସି ସ୍ଥାନ ତଥ୍ୟ ନାହିଁ"
 },
 ur: {
   login_eyebrow:"آپ سراکشا گرڈ تک کیسے رسائی حاصل کر رہے ہیں منتخب کریں",
@@ -1549,7 +1609,9 @@ ur: {
   voice_label:"🎙️ آواز کی ریکارڈنگ شامل کریں (اختیاری)", voice_record_btn:"● ریکارڈ کریں", voice_stop_btn:"■ روکیں",
   voice_upload_btn:"📎 آڈیو اپ لوڈ کریں", voice_transcribe_btn:"ٹرانسکرائب کریں → تفصیل بھریں", voice_remove_btn:"✕ ہٹائیں",
   voice_transcribing:"آڈیو ٹرانسکرائب ہو رہا ہے...", voice_transcribe_error:"اس آڈیو کو ٹرانسکرائب نہیں کیا جا سکا۔ آپ خود تفصیل ٹائپ کر سکتے ہیں۔",
-  voice_mic_denied:"مائیکروفون تک رسائی سے انکار کیا گیا یا دستیاب نہیں تھا۔ اس کے بجائے آپ آڈیو فائل اپ لوڈ کر سکتے ہیں۔", voice_prefix_label:"[آڈیو سے ٹرانسکرائب کیا گیا]"
+  voice_mic_denied:"مائیکروفون تک رسائی سے انکار کیا گیا یا دستیاب نہیں تھا۔ اس کے بجائے آپ آڈیو فائل اپ لوڈ کر سکتے ہیں۔", voice_prefix_label:"[آڈیو سے ٹرانسکرائب کیا گیا]",
+  section_geospatial:"جغرافیائی انٹیلیجنس", label_location_report:"یہ کہاں ہوا؟ (شہر / علاقہ — اختیاری)",
+  geo_hotspots_title:"سرفہرست مقامات (پچھلے 14 دن)", geo_no_data:"ابھی تک کوئی مقام کا ڈیٹا نہیں ہے"
 }
 };
 
@@ -1808,6 +1870,7 @@ document.getElementById("btn-analyze").addEventListener("click", async ()=>{
   const number = document.getElementById("in-number").value.trim();
   const description = document.getElementById("in-desc").value.trim();
   const method = document.getElementById("in-method").value;
+  const location = document.getElementById("in-location-report").value.trim();
   const resultCard = document.getElementById("result-card");
   const btn = document.getElementById("btn-analyze");
 
@@ -1822,7 +1885,7 @@ document.getElementById("btn-analyze").addEventListener("click", async ()=>{
   resultCard.innerHTML = `<div class="loading"><div class="spinner"></div> ${dict.loading_text}</div>`;
 
   try{
-    const payload = { number, claim: selectedClaim, description, method, langCode: currentLang };
+    const payload = { number, claim: selectedClaim, description, method, location, langCode: currentLang };
     const result = await classifyReport(payload);
     lastReportPayload = payload;
     lastReportResult = result;
@@ -1997,6 +2060,7 @@ async function saveReport(payload, result){
     method: payload.method,
     claim: payload.claim,
     description: payload.description,
+    location: payload.location || "",
     lang: payload.langCode,
     risk_level: result.risk_level,
     confidence: result.confidence,
@@ -2560,8 +2624,200 @@ loadCommandCenter = async function(){
   }
 
   const reports = await getAllReports();
+  renderGeoMap(reports, currencyReports);
   renderAnalyticsCharts(reports, currencyReports);
 };
+
+/* ============================================================
+   GEOSPATIAL INTELLIGENCE (Leaflet + OpenStreetMap, no API key)
+   Location text is free-form ("Lucknow, Aminabad market") so it's
+   matched against a static table of major Indian cities/districts
+   rather than calling a live geocoding API -- more reliable for a
+   demo, no external dependency that can time out or need a key.
+   ============================================================ */
+
+const INDIA_CITY_COORDS = {
+  "delhi": [28.7041, 77.1025], "new delhi": [28.6139, 77.2090],
+  "mumbai": [19.0760, 72.8777], "bombay": [19.0760, 72.8777],
+  "bengaluru": [12.9716, 77.5946], "bangalore": [12.9716, 77.5946],
+  "chennai": [13.0827, 80.2707], "madras": [13.0827, 80.2707],
+  "kolkata": [22.5726, 88.3639], "calcutta": [22.5726, 88.3639],
+  "hyderabad": [17.3850, 78.4867],
+  "pune": [18.5204, 73.8567], "poona": [18.5204, 73.8567],
+  "ahmedabad": [23.0225, 72.5714],
+  "jaipur": [26.9124, 75.7873],
+  "lucknow": [26.8467, 80.9462], "aminabad": [26.8467, 80.9462],
+  "kanpur": [26.4499, 80.3319],
+  "nagpur": [21.1458, 79.0882],
+  "indore": [22.7196, 75.8577],
+  "bhopal": [23.2599, 77.4126],
+  "patna": [25.5941, 85.1376],
+  "vadodara": [22.3072, 73.1812], "baroda": [22.3072, 73.1812],
+  "ghaziabad": [28.6692, 77.4538],
+  "ludhiana": [30.9010, 75.8573],
+  "agra": [27.1767, 78.0081],
+  "nashik": [19.9975, 73.7898],
+  "faridabad": [28.4089, 77.3178],
+  "meerut": [28.9845, 77.7064],
+  "rajkot": [22.3039, 70.8022],
+  "varanasi": [25.3176, 82.9739], "banaras": [25.3176, 82.9739],
+  "srinagar": [34.0837, 74.7973],
+  "amritsar": [31.6340, 74.8723],
+  "prayagraj": [25.4358, 81.8463], "allahabad": [25.4358, 81.8463],
+  "ranchi": [23.3441, 85.3096],
+  "coimbatore": [11.0168, 76.9558],
+  "jabalpur": [23.1815, 79.9864],
+  "gwalior": [26.2183, 78.1828],
+  "vijayawada": [16.5062, 80.6480],
+  "jodhpur": [26.2389, 73.0243],
+  "madurai": [9.9252, 78.1198],
+  "raipur": [21.2514, 81.6296],
+  "kota": [25.2138, 75.8648],
+  "guwahati": [26.1445, 91.7362],
+  "chandigarh": [30.7333, 76.7794],
+  "thiruvananthapuram": [8.5241, 76.9366], "trivandrum": [8.5241, 76.9366],
+  "solapur": [17.6599, 75.9064],
+  "hubli": [15.3647, 75.1240],
+  "bareilly": [28.3670, 79.4304],
+  "moradabad": [28.8386, 78.7733],
+  "mysuru": [12.2958, 76.6394], "mysore": [12.2958, 76.6394],
+  "gurugram": [28.4595, 77.0266], "gurgaon": [28.4595, 77.0266],
+  "aligarh": [27.8974, 78.0880],
+  "jalandhar": [31.3260, 75.5762],
+  "bhubaneswar": [20.2961, 85.8245],
+  "salem": [11.6643, 78.1460],
+  "warangal": [17.9689, 79.5941],
+  "guntur": [16.3067, 80.4365],
+  "saharanpur": [29.9640, 77.5460],
+  "gorakhpur": [26.7606, 83.3732],
+  "bikaner": [28.0229, 73.3119],
+  "amravati": [20.9374, 77.7796],
+  "noida": [28.5355, 77.3910],
+  "jamshedpur": [22.8046, 86.2029],
+  "bhilai": [21.1938, 81.3509],
+  "cuttack": [20.4625, 85.8828],
+  "kochi": [9.9312, 76.2673], "cochin": [9.9312, 76.2673],
+  "nellore": [14.4426, 79.9865],
+  "bhavnagar": [21.7645, 72.1519],
+  "dehradun": [30.3165, 78.0322],
+  "durgapur": [23.5204, 87.3119],
+  "asansol": [23.6739, 86.9524],
+  "nanded": [19.1383, 77.3210],
+  "kolhapur": [16.7050, 74.2433],
+  "ajmer": [26.4499, 74.6399],
+  "kalaburagi": [17.3297, 76.8343], "gulbarga": [17.3297, 76.8343],
+  "jamnagar": [22.4707, 70.0577],
+  "ujjain": [23.1765, 75.7885],
+  "siliguri": [26.7271, 88.3953],
+  "jhansi": [25.4484, 78.5685],
+  "jammu": [32.7266, 74.8570],
+  "sangli": [16.8524, 74.5815],
+  "mangaluru": [12.9141, 74.8560], "mangalore": [12.9141, 74.8560],
+  "erode": [11.3410, 77.7172],
+  "belagavi": [15.8497, 74.4977], "belgaum": [15.8497, 74.4977],
+  "tirunelveli": [8.7139, 77.7567],
+  "gaya": [24.7955, 84.9994],
+  "jalgaon": [21.0077, 75.5626],
+  "udaipur": [24.5854, 73.7125],
+  "davanagere": [14.4644, 75.9218],
+  "kozhikode": [11.2588, 75.7804], "calicut": [11.2588, 75.7804],
+  "kurnool": [15.8281, 78.0373],
+  "rajahmundry": [17.0005, 81.8040],
+  "bokaro": [23.6693, 86.1511]
+};
+
+const INDIA_CITY_KEYS_BY_LENGTH = Object.keys(INDIA_CITY_COORDS).sort((a, b) => b.length - a.length);
+
+function geocodeLocation(text){
+  if(!text) return null;
+  const normalized = text.toLowerCase();
+  for(const key of INDIA_CITY_KEYS_BY_LENGTH){
+    if(normalized.includes(key)){
+      return { name: key.charAt(0).toUpperCase() + key.slice(1), coords: INDIA_CITY_COORDS[key] };
+    }
+  }
+  return null;
+}
+
+let geoMap = null;
+let geoMarkersLayer = null;
+
+function renderGeoMap(reports, currencyReports){
+  if(!window.L) return;
+  const mapContainer = document.getElementById("geo-map");
+  if(!mapContainer) return;
+
+  if(!geoMap){
+    geoMap = L.map("geo-map", { scrollWheelZoom: false }).setView([22.5, 79], 5);
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 18
+    }).addTo(geoMap);
+    geoMarkersLayer = L.layerGroup().addTo(geoMap);
+  }else{
+    geoMarkersLayer.clearLayers();
+  }
+  // container may have been hidden (display:none) when the map was first
+  // created, which throws off Leaflet's internal size calculation
+  setTimeout(() => geoMap.invalidateSize(), 50);
+
+  const cutoffMs = Date.now() - 14 * 24 * 3600 * 1000;
+  const cityAgg = {}; // name -> { coords, fraudCount, highCount, currencyCount, flaggedCount }
+
+  reports.forEach(r => {
+    if(new Date(r.timestamp).getTime() < cutoffMs) return;
+    const geo = geocodeLocation(r.location);
+    if(!geo) return;
+    if(!cityAgg[geo.name]) cityAgg[geo.name] = { coords: geo.coords, fraudCount: 0, highCount: 0, currencyCount: 0, flaggedCount: 0 };
+    cityAgg[geo.name].fraudCount++;
+    if(r.risk_level === "high") cityAgg[geo.name].highCount++;
+  });
+
+  currencyReports.forEach(r => {
+    if(new Date(r.timestamp).getTime() < cutoffMs) return;
+    const geo = geocodeLocation(r.location);
+    if(!geo) return;
+    if(!cityAgg[geo.name]) cityAgg[geo.name] = { coords: geo.coords, fraudCount: 0, highCount: 0, currencyCount: 0, flaggedCount: 0 };
+    cityAgg[geo.name].currencyCount++;
+    if(r.authenticity_verdict === "likely_counterfeit" || r.authenticity_verdict === "visual_anomalies_found") cityAgg[geo.name].flaggedCount++;
+  });
+
+  const cityNames = Object.keys(cityAgg);
+
+  cityNames.forEach(name => {
+    const c = cityAgg[name];
+    const total = c.fraudCount + c.currencyCount;
+    const isHot = c.highCount > 0 || c.flaggedCount > 0;
+    const color = isHot ? "#E23D28" : "#3B82F6";
+    const radius = Math.min(9 + total * 3, 28);
+
+    const marker = L.circleMarker(c.coords, { radius, color, fillColor: color, fillOpacity: 0.5, weight: 2 });
+    marker.bindPopup(
+      `<strong>${escapeHtml(name)}</strong><br>` +
+      `Fraud reports: ${c.fraudCount} (${c.highCount} high-risk)<br>` +
+      `Currency checks: ${c.currencyCount} (${c.flaggedCount} flagged)`
+    );
+    marker.addTo(geoMarkersLayer);
+  });
+
+  const dict = getDict(currentLang);
+  const hotspotList = document.getElementById("geo-hotspot-list");
+  const sorted = cityNames
+    .map(name => ({ name, total: cityAgg[name].fraudCount + cityAgg[name].currencyCount }))
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 8);
+
+  if(sorted.length === 0){
+    hotspotList.innerHTML = `<div class="chart-empty" style="height:auto;padding:20px 0;">${escapeHtml(dict.geo_no_data)}</div>`;
+  }else{
+    hotspotList.innerHTML = sorted.map(item => `
+      <div class="geo-hotspot-item">
+        <span class="geo-hotspot-name">${escapeHtml(item.name)}</span>
+        <span class="geo-hotspot-count">${item.total}</span>
+      </div>
+    `).join("");
+  }
+}
 
 /* ============================================================
    ANALYTICS CHARTS (Chart.js) — scam type breakdown, currency
