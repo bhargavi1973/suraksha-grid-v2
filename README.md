@@ -118,7 +118,7 @@ suraksha-ai/
 
 ## Architecture
 
-![](ArcitectureDiagram.png)
+![](SurakshaAI/ArchitectureDiagram.png)
 
 Every citizen report — whether typed, spoken, or photographed — flows through `/api/llm` into the same classification logic and the same Upstash dataset that powers the Command Center. This is what makes the fraud network graph, geo map, and analytics dashboard reflect *one* intelligence picture instead of three siloed tools.
 
